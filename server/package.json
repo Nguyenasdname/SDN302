@@ -1,0 +1,24 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "body-parser": "^2.2.0",
+    "dotenv": "^17.2.3",
+    "mongodb": "^6.20.0",
+    "mongoosh": "^0.0.7",
+    "nodemon": "^3.1.10"
+  }
+}
