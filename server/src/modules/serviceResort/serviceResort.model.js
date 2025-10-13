@@ -6,7 +6,8 @@ const serviceSchema = new mongoose.Schema({
     serviceDescription: { type: String },
     servicePrice: { type: Number },
     createDate: { type: Date, default: Date.now },
-    serviceIMG: { type: String }
+    serviceIMG: { type: String },
+    resortId: { type: Schema.Types.ObjectId, ref: 'Resort' },   
 });
 
-module.exports = mongoose.model('Service', serviceSchema);
+module.exports = mongoose.model('ServiceResort', serviceSchema);

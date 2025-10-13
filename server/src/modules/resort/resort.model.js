@@ -9,7 +9,8 @@ const resortSchema = new mongoose.Schema({
     resortStatus: { type: String, default: 'Available' },
     resortIMG: { type: String },
     createDate: { type: Date, default: Date.now },
-    resortCapacity: { type: Number, default: 2 }
+    resortCapacity: { type: Number, default: 2 },
+    services: [{ type: Schema.Types.ObjectId, ref: 'ServiceResort' }],
 });
 
 module.exports = mongoose.model('Resort', resortSchema);
