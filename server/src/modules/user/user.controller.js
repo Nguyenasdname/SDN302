@@ -1,7 +1,7 @@
 const userService = require('./user.service')
 
 exports.getListUsers = async (req, res) => {
-    const users = userService.getListUsers
+    const users = userService.getListUsers()
     res.json({ users })
 }
 
