@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const contactController = require('./contact.controller')
 const { tokenProvider } = require('../../middlewares/authMiddleware')
-const { allowRoles } = require('../../middlewares/roleModdleware')
+const { allowRoles } = require('../../middlewares/roleMiddleware')
 
 // Tạo contact
 router.post('/', tokenProvider, allowRoles('user', 'employee', 'admin'), contactController.createContact);

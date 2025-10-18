@@ -1,0 +1,22 @@
+import { useState } from 'react';
+import api from '../api';
+
+export const usePut = () => {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    const putData = async (endpoint, payload) => {
+        setLoading(true);
+        try {
+            const res = await api.put(endpoint, payload);
+            return res.data;
+        } catch (err) {
+            setError(err);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return { putData, loading, error };
+};
