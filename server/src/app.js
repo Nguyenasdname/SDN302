@@ -2,6 +2,7 @@ const express = require('express')
 const jwt = require('jsonwebtoken')
 const connectDB = require('./config/database')
 const bodyParser = require('body-parser')
+const cors = require('cors')
 
 const userRouter = require('./modules/user/user.routes')
 const authRouter = require('./modules/auth/auth.routes')
@@ -16,6 +17,13 @@ connectDB()
 
 const app = express()
 app.use(express.json())
+
+app.use(cors({
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}))
 // app.use(bodyParser.json())
 
 app.use('/user', userRouter)
