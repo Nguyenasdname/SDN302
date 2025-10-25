@@ -8,7 +8,12 @@ export const usePut = () => {
     const putData = async (endpoint, payload) => {
         setLoading(true);
         try {
-            const res = await api.put(endpoint, payload);
+            const token = localStorage.getItem('token')
+            const res = await api.put(endpoint, payload, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             return res.data;
         } catch (err) {
             setError(err);

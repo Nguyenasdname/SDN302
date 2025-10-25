@@ -8,7 +8,12 @@ export const useDelete = () => {
     const deleteData = async (endpoint) => {
         setLoading(true);
         try {
-            const res = await api.delete(endpoint);
+            const token = localStorage.getItem('token')
+            const res = await api.delete(endpoint, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             return res.data;
         } catch (err) {
             setError(err);

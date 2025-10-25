@@ -8,10 +8,16 @@ export const usePost = () => {
     const postData = async (endpoint, payload) => {
         setLoading(true)
         try {
-            const res = await api.post(endpoint, payload)
+            const token = localStorage.getItem('token')
+            const res = await api.post(endpoint, payload, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
             return res.data
         } catch (err) {
             setError(err)
+            throw err
         } finally {
             setLoading(false)
         }

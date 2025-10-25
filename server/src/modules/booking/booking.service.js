@@ -26,9 +26,15 @@ exports.getBookingDetails = async (bookingId) => {
 
 exports.createNewBooking = async (bookingData, userId) => {
     try {
+
+        const { checkIn, checkOut, ...rest } = bookingData
+
+
         const newBooking = new Booking({
             userId,
-            ...bookingData
+            checkIn: new Date(checkIn),
+            checkOut: new Date(checkOut),
+            ...rest
         })
         return await newBooking.save()
     } catch (err) {

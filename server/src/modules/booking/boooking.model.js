@@ -6,7 +6,7 @@ const bookingSchema = new mongoose.Schema({
     resortId: { type: mongoose.Schema.Types.ObjectId, ref: 'Resort' },
     checkIn: { type: Date },
     checkOut: { type: Date },
-    bookingStatus: { type: String, enum:['pending, competed, canceled'], default: 'pending' },
+    bookingStatus: { type: String, enum: ['pending', 'competed', 'checkIn', 'checkOut', 'canceled'], default: 'pending' },
     createDate: { type: Date, default: Date.now },
     bookingTotal: { type: Number },
     numberOfGuest: { type: Number }

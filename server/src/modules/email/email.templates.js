@@ -1,10 +1,11 @@
 // Xác nhận email
-exports.verifyEmailTemplate = (verifyLink, userName) => `
+exports.verifyEmailTemplate = (verifyLink, userName, otp) => `
     <div style="line-height: 1.6;">
         <h2>Hello ${userName || ''}</h2>
         <p>Thank you for signing up our system! Please verify your email address:</p>
         <a href="${verifyLink}" style="text-decoration: none">Verify Email</a>
         <p>If you didn't sign up, please ignore this message</p>
+        <div>Your OTP is: ${otp}</div>
     </div>
 `
 
