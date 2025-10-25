@@ -8,12 +8,12 @@ const userSchema = new Schema({
     userPass: { type: String },
     userPhone: { type: String },
     userImg: { type: String },
-    userStatus: { type: String, default: 'Active' },
+    userStatus: { type: String, enum:['Active', 'Banned', 'UnVerified'], default: 'UnVerified' },
     userRole: { type: String, enum: ['admin', 'employee', 'user'], default: 'user' },
     createDate: { type: Date, default: Date.now },
     userAddress: { type: String },
     userFirstName: { type: String },
-    userLastName: { type: String }
+    userLastName: { type: String },
 })
 
 userSchema.pre('save', async function () {

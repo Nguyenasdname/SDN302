@@ -19,7 +19,7 @@ transporter.verify((error, success) => {
     }
 });
 
-exports.sendMail = async ({ to, subject, html }) => {
+exports.sendMail = async ( to, subject, html ) => {
     try {
         const mailOptions = {
             from: `"My App" <${process.env.EMAIL_USER}>`,
