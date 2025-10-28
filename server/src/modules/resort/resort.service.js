@@ -1,12 +1,13 @@
 const Resort = require("./resort.model");
 const ServiceResort = require("../serviceResort/serviceResort.model");
+const Booking = require('../booking/boooking.model')
 
 // Lấy all resort
 exports.getAllResorts = async () => {
   try {
     return await Resort.find()
-    .populate('services')
-    .sort({ createDate: -1 });
+      .populate('services')
+      .sort({ createDate: -1 });
   } catch (error) {
     throw error;
   }
@@ -31,7 +32,7 @@ exports.createResort = async (data) => {
     // Tạo service resort
     const serviceResort = []
     for (const svc of data.services) {
-      const newServiceResort = new ServiceResort({...svc});
+      const newServiceResort = new ServiceResort({ ...svc });
       const savedServiceResort = await newServiceResort.save();
       serviceResort.push(savedServiceResort._id);
     }
@@ -72,3 +73,44 @@ exports.deleteResort = async (id) => {
     throw error;
   }
 };
+
+exports.checkAvailable = async (resortId, startDate, endDate) => {
+  const activeStatuses = ['pending', 'confirmed', 'checkIn', 'checkOut']
+
+  try {
+    const conflictBooking = await Booking.findOne({
+      resortId,
+      bookingStatus: { $in: activeStatuses },
+      $or: [
+        { checkIn: { $lt: endDate }, checkOut: { $gt: startDate } }
+      ]
+    })
+
+    return conflictBooking
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+exports.getAvailableResorts = async (startDate, endDate, numberOfGuest) => {
+  const activeStatuses = ['pending', 'confirmed', 'checkIn', 'checkOut'];
+
+  try {
+    const bookedResorts = await Booking.find({
+      bookingStatus: { $in: activeStatuses },
+      $or: [
+        { checkIn: { $lt: endDate }, checkOut: { $gt: startDate } }
+      ]
+    }).distinct('resortId');
+
+    const availableResorts = await Resort.find({
+      _id: { $nin: bookedResorts },
+      resortCapacity: { $gte: numberOfGuest }
+    })
+
+    return availableResorts
+
+  } catch (err) {
+    console.error(err)
+  }
+}

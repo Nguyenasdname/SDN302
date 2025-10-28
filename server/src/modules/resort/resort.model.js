@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const { Schema } = mongoose
 
 const resortSchema = new mongoose.Schema({
     resortName: { type: String, required: true },
@@ -9,8 +8,7 @@ const resortSchema = new mongoose.Schema({
     resortStatus: { type: String, default: 'Available' },
     resortIMG: { type: String },
     createDate: { type: Date, default: Date.now },
-    resortCapacity: { type: Number, default: 2 },
-    services: [{ type: Schema.Types.ObjectId, ref: 'ServiceResort' }],
+    resortCapacity: { type: Number, default: 2 }
 });
 
 module.exports = mongoose.model('Resort', resortSchema);
