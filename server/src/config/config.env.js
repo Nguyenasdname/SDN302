@@ -7,5 +7,8 @@ module.exports = {
     emailUser: process.env.EMAIL_USER,
     emailPass: process.env.EMAIL_PASS,
     baseAppUrl: process.env.BASE_APP_URL,
-    mongoUri: process.env.MONGO_URI
+    mongoUri: process.env.MONGO_URI,
+    cloudinaryName: process.env.CLOUDINARY_NAME,
+    cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
+    cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET
 }

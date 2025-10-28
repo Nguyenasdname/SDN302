@@ -28,8 +28,6 @@ exports.createNewBooking = async (bookingData, userId) => {
     try {
 
         const { checkIn, checkOut, ...rest } = bookingData
-
-
         const newBooking = new Booking({
             userId,
             checkIn: new Date(checkIn),
