@@ -1,5 +1,4 @@
 const resortService = require('./resort.service');
-z
 // Lấy all resort
 exports.getAllResorts = async (req, res) => {
     try {

@@ -10,12 +10,7 @@ export const useGet = (endpoint) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const token = localStorage.getItem('token')
-                const res = await api.get(endpoint, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                })
+                const res = await api.get(endpoint)
                 setData(res.data)
             } catch (err) {
                 setError(err)

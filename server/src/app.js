@@ -1,7 +1,5 @@
 const express = require('express')
-const jwt = require('jsonwebtoken')
 const connectDB = require('./config/database')
-const bodyParser = require('body-parser')
 const cors = require('cors')
 
 const userRouter = require('./modules/user/user.routes')

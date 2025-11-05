@@ -7,14 +7,14 @@ exports.getListUsers = async (req, res) => {
 
 exports.getUserProfile = async (req, res) => {
     try {
-        const userId = req.user._id
+        const userId = req.user.id
         const user = await userService.getUserProfile(userId)
 
         if (!user) {
             return res.status(404).json({ message: `User Not Found` })
         }
 
-        res.json({ user })
+        res.json(user)
     } catch (err) {
 
     }
