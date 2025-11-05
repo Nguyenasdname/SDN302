@@ -5,12 +5,14 @@ import VerifyOTPPage from '../pages/VerifyOTP/VerifyOTP';
 import VerifyLinkPage from '../pages/VerifyOTP/VerifyLink';
 import ChangePassword from '../pages/ChangePassword/ChangePassword';
 import RegisterPage from '../pages/RegisterPage/RegisterPage';
+import HomePage from '../pages/HomePage/HomePage';
+import MainLayout from '../layouts/MainLayout';
 
 const AppRouter = () => {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<LoginPage />} />
+                <Route path="/" element={<MainLayout><HomePage /></MainLayout>} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/verify-otp" element={<VerifyOTPPage />} />

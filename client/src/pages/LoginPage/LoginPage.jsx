@@ -30,7 +30,7 @@ const LoginPage = () => {
 
             if (res.token) {
                 localStorage.setItem('token', res.token)
-                alert(`Oke cu ${res.user + res.token}`)
+                navigate('/')
             } else {
                 setError(res.message || 'Login Failed')
                 return
