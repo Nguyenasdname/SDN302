@@ -9,7 +9,7 @@ const userSchema = new Schema({
     userPhone: { type: String },
     userImg: { type: String },
     userStatus: { type: String, enum:['Active', 'Banned', 'UnVerified'], default: 'UnVerified' },
-    userRole: { type: String, enum: ['admin', 'employee', 'user'], default: 'user' },
+    userRole: { type: String, enum: ['admin', 'employee', 'customer'], default: 'customer' },
     createDate: { type: Date, default: Date.now },
     userAddress: { type: String },
     userFirstName: { type: String },

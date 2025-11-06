@@ -1,16 +1,5 @@
 const User = require('./user.model')
 
-
-// exports.getListUsers = async (req, res) => {
-//     try {
-//         const users = await User.find()
-//         res.status(200).json(users)
-//     } catch (err) {
-//         console.error(` Error: ${err}`)
-//         res.json({ message: `${err}` })
-//     }
-// }
-
 exports.getAllUser = async () => {
     try {
         return await User.find()
@@ -27,3 +16,23 @@ exports.getUserProfile = async (userId) => {
         console.error(err)
     }
 }
+
+exports.updateUserRole = async (userId, role) => {
+    try {
+        const user = await User.findById(userId)
+        user.userRole = role
+        user.save()
+    } catch (err) {
+        console.error(err)
+    }
+}
+
+exports.updateUserStatus = async (userId, status) => {
+    try {
+        const user = await User.findById(userId)
+        user.userStatus = status
+        user.save()
+    } catch (err) {
+        console.error(err)
+    }
+} 

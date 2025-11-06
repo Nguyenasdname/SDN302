@@ -12,14 +12,21 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
-const Header = ({ currentPage,  currentUser }) => {
+const Header = ({ currentPage }) => {
     const [isLogin, setIsLogin] = useState(false)
     const {
         data: user,
     } = useGet('/user/profile')
 
+    useEffect(() => {
+        if (user) {
+            setIsLogin(true)
+        }
+    }, [user])
+
     const handleLogout = () => {
         localStorage.removeItem('token')
+        setIsLogin(false)
         navigate('/')
     }
 
@@ -50,7 +57,7 @@ const Header = ({ currentPage,  currentUser }) => {
                     {/* Navigation */}
                     <nav className="hidden md:flex items-center gap-8">
                         <button
-                            onClick={() => navigate('home')}
+                            onClick={() => navigate('/')}
                             className={`transition-colors ${currentPage === 'home' ? 'text-[#14b8a6]' : 'text-gray-600 hover:text-[#14b8a6]'
                                 }`}
                         >
@@ -78,7 +85,7 @@ const Header = ({ currentPage,  currentUser }) => {
                     </nav>
 
                     {/* User Menu or Sign In Button */}
-                    {user ? (
+                    {isLogin ? (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button
@@ -99,15 +106,15 @@ const Header = ({ currentPage,  currentUser }) => {
                                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem className='cursor-pointer'
-                                onClick={() => navigate('profile')}>
+                                    onClick={() => navigate('profile')}>
                                     <User className="w-4 h-4 mr-2 " />
                                     Profile
                                 </DropdownMenuItem>
                                 {user.userRole === 'admin' && (
                                     <>
                                         <DropdownMenuSeparator />
-                                        <DropdownMenuItem className='cursor-pointer' 
-                                        onClick={() => navigate('admin-accounts')}>
+                                        <DropdownMenuItem className='cursor-pointer'
+                                            onClick={() => navigate('admin-dashboard')}>
                                             <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path
                                                     strokeLinecap="round"
@@ -122,7 +129,7 @@ const Header = ({ currentPage,  currentUser }) => {
                                 )}
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem className='cursor-pointer'
-                                onClick={() => handleLogout()}>
+                                    onClick={() => handleLogout()}>
                                     <LogOut className="w-4 h-4 mr-2" />
                                     Logout
                                 </DropdownMenuItem>

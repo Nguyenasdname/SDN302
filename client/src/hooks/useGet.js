@@ -7,18 +7,19 @@ export const useGet = (endpoint) => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const res = await api.get(endpoint)
-                setData(res.data)
-            } catch (err) {
-                setError(err)
-            } finally {
-                setLoading(false)
-            }
+    const fetchData = async () => {
+        try {
+            const res = await api.get(endpoint)
+            setData(res.data)
+        } catch (err) {
+            setError(err)
+        } finally {
+            setLoading(false)
         }
+    }
+
+    useEffect(() => {
         fetchData()
     }, [endpoint])
-    return { data, loading, error }
+    return { data, loading, error, refetch: fetchData }
 }

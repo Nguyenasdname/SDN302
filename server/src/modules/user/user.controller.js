@@ -1,8 +1,8 @@
 const userService = require('./user.service')
 
-exports.getListUsers = async (req, res) => {
-    const users = userService.getListUsers()
-    res.json({ users })
+exports.getAllUser = async (req, res) => {
+    const users = await userService.getAllUser()
+    res.json(users)
 }
 
 exports.getUserProfile = async (req, res) => {
@@ -19,3 +19,23 @@ exports.getUserProfile = async (req, res) => {
 
     }
 }
+
+exports.updateUserRole = async (req, res) => {
+    try {
+        const { userId, role } = req.body
+        await userService.updateUserRole(userId, role)
+        res.json({ message: 'Successful' })
+    } catch (err) {
+        console.error(err)
+    }
+}
+
+exports.updateUserStatus = async (req, res) => {
+    try {
+        const { userId, status } = req.body
+        await userService.updateUserStatus(userId, status)
+        res.json({ message: 'Successful' })
+    } catch (err) {
+        console.error(err)
+    }
+} 
