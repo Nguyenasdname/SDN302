@@ -38,6 +38,7 @@ import {
 } from '../../components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { useGet } from '../../hooks/useGet';
+import { usePut } from '../../hooks/usePut';
 
 
 // Mock user data
@@ -53,7 +54,7 @@ import { useGet } from '../../hooks/useGet';
 // ];
 
 const AccountManagementPage = ({ onNavigate }) => {
-    const { data: mockUsers, loading: userLoading } = useGet("/user");
+    const { data: mockUsers, loading: userLoading, refetch } = useGet("/user");
 
     const [users, setUsers] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
@@ -67,6 +68,8 @@ const AccountManagementPage = ({ onNavigate }) => {
     const [showBanDialog, setShowBanDialog] = useState(false);
 
     const itemsPerPage = 6;
+
+    const { putData } = usePut()
 
     // Cập nhật users khi mockUsers có dữ liệu
     useEffect(() => {
@@ -99,12 +102,19 @@ const AccountManagementPage = ({ onNavigate }) => {
     const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
 
 
-    const handleUpdateRole = () => {
+    const handleUpdateRole = async () => {
         if (!selectedUser || !newRole) return;
 
-        setUsers(users.map(u =>
-            u._id === selectedUser._id ? { ...u, role: newRole } : u
-        ));
+        const res = await putData('/user/update-role', {
+            userId: selectedUser._id,
+            role: newRole
+        })
+
+        if (!res) {
+            toast.error('Hell Nah')
+            return
+        }
+        await refetch()
 
         toast.success('Role updated successfully!');
         setShowRoleDialog(false);
@@ -112,13 +122,21 @@ const AccountManagementPage = ({ onNavigate }) => {
         setNewRole('');
     };
 
-    const handleBanToggle = () => {
+    const handleBanToggle = async () => {
         if (!userToBan) return;
 
-        const newStatus = userToBan.status === 'Active' ? 'Banned' : 'Active';
-        setUsers(users.map(u =>
-            u.id === userToBan.id ? { ...u, status: newStatus } : u
-        ));
+        const newStatus = userToBan.userStatus === 'Active' ? 'Banned' : 'Active';
+
+        const res = await putData('/user/update-status', {
+            userId: userToBan._id,
+            status: newStatus
+        })
+
+        if (!res) {
+            toast.error('Hell Nah')
+            return
+        }
+        await refetch()
 
         toast.success(`User ${newStatus === 'Banned' ? 'Banned' : 'UnBanned'} successfully!`);
         setShowBanDialog(false);
