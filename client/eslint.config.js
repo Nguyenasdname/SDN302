@@ -24,6 +24,7 @@ export default defineConfig([
     },
     rules: {
       'no-unused-vars': ['warn', { varsIgnorePattern: '^[A-Z_]' }],
+      'import/no-unresolved': 'error', // 👈 thêm dòng này
     },
   },
 ])
