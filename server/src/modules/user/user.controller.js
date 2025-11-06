@@ -1,8 +1,8 @@
 const userService = require('./user.service')
 
-exports.getListUsers = async (req, res) => {
-    const users = userService.getListUsers()
-    res.json({ users })
+exports.getAllUser = async (req, res) => {
+    const users = await userService.getAllUser()
+    res.json( users )
 }
 
 exports.getUserProfile = async (req, res) => {

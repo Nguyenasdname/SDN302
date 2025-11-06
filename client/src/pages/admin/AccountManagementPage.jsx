@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Search, Filter, Eye, Edit, Ban, Shield, UserCheck, UserX } from 'lucide-react';
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
@@ -37,44 +37,58 @@ import {
     AlertDialogTitle,
 } from '../../components/ui/alert-dialog';
 import { toast } from 'sonner';
+import { useGet } from '../../hooks/useGet';
 
 
 // Mock user data
-const mockUsers = [
-    { id: 1, fullName: 'Nguyen Admin', email: 'nguyen@mybooking.com', role: 'admin', status: 'active', joinDate: '2024-01-15' },
-    { id: 2, fullName: 'Thanh Customer', email: 'thanh@gmail.com', role: 'customer', status: 'active', joinDate: '2024-03-20' },
-    { id: 3, fullName: 'Loi Employee', email: 'loi@mybooking.com', role: 'employee', status: 'active', joinDate: '2024-02-10' },
-    { id: 4, fullName: 'Minh Tran', email: 'minh.tran@gmail.com', role: 'customer', status: 'active', joinDate: '2024-04-05' },
-    { id: 5, fullName: 'Anh Le', email: 'anh.le@gmail.com', role: 'customer', status: 'banned', joinDate: '2024-03-12' },
-    { id: 6, fullName: 'Hoa Nguyen', email: 'hoa.nguyen@gmail.com', role: 'employee', status: 'active', joinDate: '2024-01-25' },
-    { id: 7, fullName: 'Tuan Pham', email: 'tuan.pham@gmail.com', role: 'customer', status: 'active', joinDate: '2024-05-01' },
-    { id: 8, fullName: 'Linh Vo', email: 'linh.vo@gmail.com', role: 'customer', status: 'active', joinDate: '2024-04-18' },
-];
-
+// const mockUsers = [
+//     { id: 1, fullName: 'Nguyen Admin', email: 'nguyen@mybooking.com', role: 'admin', status: 'active', joinDate: '2024-01-15' },
+//     { id: 2, fullName: 'Thanh Customer', email: 'thanh@gmail.com', role: 'customer', status: 'active', joinDate: '2024-03-20' },
+//     { id: 3, fullName: 'Loi Employee', email: 'loi@mybooking.com', role: 'employee', status: 'active', joinDate: '2024-02-10' },
+//     { id: 4, fullName: 'Minh Tran', email: 'minh.tran@gmail.com', role: 'customer', status: 'active', joinDate: '2024-04-05' },
+//     { id: 5, fullName: 'Anh Le', email: 'anh.le@gmail.com', role: 'customer', status: 'banned', joinDate: '2024-03-12' },
+//     { id: 6, fullName: 'Hoa Nguyen', email: 'hoa.nguyen@gmail.com', role: 'employee', status: 'active', joinDate: '2024-01-25' },
+//     { id: 7, fullName: 'Tuan Pham', email: 'tuan.pham@gmail.com', role: 'customer', status: 'active', joinDate: '2024-05-01' },
+//     { id: 8, fullName: 'Linh Vo', email: 'linh.vo@gmail.com', role: 'customer', status: 'active', joinDate: '2024-04-18' },
+// ];
 
 const AccountManagementPage = ({ onNavigate }) => {
-    const [users, setUsers] = useState(mockUsers);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [roleFilter, setRoleFilter] = useState('all');
-    const [statusFilter, setStatusFilter] = useState('all');
+    const { data: mockUsers, loading: userLoading } = useGet("/user");
+
+    const [users, setUsers] = useState([]);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [roleFilter, setRoleFilter] = useState("all");
+    const [statusFilter, setStatusFilter] = useState("all");
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedUser, setSelectedUser] = useState(null);
     const [showRoleDialog, setShowRoleDialog] = useState(false);
-    const [newRole, setNewRole] = useState('');
+    const [newRole, setNewRole] = useState("");
     const [userToBan, setUserToBan] = useState(null);
     const [showBanDialog, setShowBanDialog] = useState(false);
 
     const itemsPerPage = 6;
 
-    // Filter users
-    const filteredUsers = users.filter(user => {
-        const matchesSearch =
-            user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            user.id.toString().includes(searchQuery);
+    // Cập nhật users khi mockUsers có dữ liệu
+    useEffect(() => {
+        if (mockUsers && Array.isArray(mockUsers)) {
+            setUsers(mockUsers);
+        }
+    }, [mockUsers]);
 
-        const matchesRole = roleFilter === 'all' || user.role === roleFilter;
-        const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
+    // Nếu đang loading hoặc chưa có dữ liệu thì return sớm
+    if (userLoading || !users.length) {
+        return <div>Loading User...</div>;
+    }
+
+    // Filter users
+    const filteredUsers = users.filter((user) => {
+        const matchesSearch =
+            user.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.userEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user._id.toString().includes(searchQuery);
+
+        const matchesRole = roleFilter === "all" || user.userRole === roleFilter;
+        const matchesStatus = statusFilter === "all" || user.userStatus === statusFilter;
 
         return matchesSearch && matchesRole && matchesStatus;
     });
@@ -84,11 +98,12 @@ const AccountManagementPage = ({ onNavigate }) => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
 
+
     const handleUpdateRole = () => {
         if (!selectedUser || !newRole) return;
 
         setUsers(users.map(u =>
-            u.id === selectedUser.id ? { ...u, role: newRole } : u
+            u._id === selectedUser._id ? { ...u, role: newRole } : u
         ));
 
         toast.success('Role updated successfully!');
@@ -100,12 +115,12 @@ const AccountManagementPage = ({ onNavigate }) => {
     const handleBanToggle = () => {
         if (!userToBan) return;
 
-        const newStatus = userToBan.status === 'active' ? 'banned' : 'active';
+        const newStatus = userToBan.status === 'Active' ? 'Banned' : 'Active';
         setUsers(users.map(u =>
             u.id === userToBan.id ? { ...u, status: newStatus } : u
         ));
 
-        toast.success(`User ${newStatus === 'banned' ? 'banned' : 'unbanned'} successfully!`);
+        toast.success(`User ${newStatus === 'Banned' ? 'Banned' : 'UnBanned'} successfully!`);
         setShowBanDialog(false);
         setUserToBan(null);
     };
@@ -162,8 +177,8 @@ const AccountManagementPage = ({ onNavigate }) => {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">All Status</SelectItem>
-                                    <SelectItem value="active">Active</SelectItem>
-                                    <SelectItem value="banned">Banned</SelectItem>
+                                    <SelectItem value="Active">Active</SelectItem>
+                                    <SelectItem value="Banned">Banned</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -176,7 +191,7 @@ const AccountManagementPage = ({ onNavigate }) => {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>User ID</TableHead>
-                                <TableHead>Full Name</TableHead>
+                                <TableHead>Username</TableHead>
                                 <TableHead>Email</TableHead>
                                 <TableHead>Role</TableHead>
                                 <TableHead>Status</TableHead>
@@ -185,41 +200,41 @@ const AccountManagementPage = ({ onNavigate }) => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {paginatedUsers.map((user) => (
-                                <TableRow key={user.id}>
-                                    <TableCell>#{user.id}</TableCell>
-                                    <TableCell>{user.fullName}</TableCell>
-                                    <TableCell className="text-gray-600">{user.email}</TableCell>
+                            {paginatedUsers?.map((user) => (
+                                <TableRow key={user._id}>
+                                    <TableCell>#{user._id}</TableCell>
+                                    <TableCell>{user.userName}</TableCell>
+                                    <TableCell className="text-gray-600">{user.userEmail}</TableCell>
                                     <TableCell>
                                         <Badge
                                             variant="outline"
                                             className={
-                                                user.role === 'admin'
+                                                user.userRole === 'admin'
                                                     ? 'bg-purple-100 text-purple-700 border-purple-200'
-                                                    : user.role === 'employee'
+                                                    : user.userRole === 'employee'
                                                         ? 'bg-blue-100 text-blue-700 border-blue-200'
                                                         : 'bg-gray-100 text-gray-700 border-gray-200'
                                             }
                                         >
-                                            {user.role === 'admin' && <Shield className="w-3 h-3 mr-1" />}
-                                            {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                                            {user.userRole === 'admin' && <Shield className="w-3 h-3 mr-1" />}
+                                            {user.userRole.charAt(0).toUpperCase() + user.userRole.slice(1)}
                                         </Badge>
                                     </TableCell>
                                     <TableCell>
                                         <Badge
-                                            variant={user.status === 'active' ? 'default' : 'destructive'}
+                                            variant={user.userStatus === 'Active' ? 'default' : 'destructive'}
                                             className={
-                                                user.status === 'active'
+                                                user.userStatus === 'Active'
                                                     ? 'bg-green-100 text-green-700 border-green-200'
                                                     : 'bg-red-100 text-red-700 border-red-200'
                                             }
                                         >
-                                            {user.status === 'active' ? <UserCheck className="w-3 h-3 mr-1" /> : <UserX className="w-3 h-3 mr-1" />}
-                                            {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                                            {user.userStatus === 'Active' ? <UserCheck className="w-3 h-3 mr-1" /> : <UserX className="w-3 h-3 mr-1" />}
+                                            {user.userStatus.charAt(0).toUpperCase() + user.userStatus.slice(1)}
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="text-gray-600">
-                                        {new Date(user.joinDate).toLocaleDateString('en-US', {
+                                        {new Date(user.createDate).toLocaleDateString('en-US', {
                                             year: 'numeric',
                                             month: 'short',
                                             day: 'numeric'
@@ -232,7 +247,7 @@ const AccountManagementPage = ({ onNavigate }) => {
                                                 size="sm"
                                                 onClick={() => {
                                                     setSelectedUser(user);
-                                                    setNewRole(user.role);
+                                                    setNewRole(user.userRole);
                                                     setShowRoleDialog(true);
                                                 }}
                                             >
@@ -246,9 +261,9 @@ const AccountManagementPage = ({ onNavigate }) => {
                                                     setUserToBan(user);
                                                     setShowBanDialog(true);
                                                 }}
-                                                className={user.status === 'banned' ? 'text-green-600 hover:text-green-700' : 'text-red-600 hover:text-red-700'}
+                                                className={user.userStatus === 'banned' ? 'text-green-600 hover:text-green-700' : 'text-red-600 hover:text-red-700'}
                                             >
-                                                {user.status === 'banned' ? (
+                                                {user.userStatus === 'banned' ? (
                                                     <>
                                                         <UserCheck className="w-4 h-4 mr-1" />
                                                         Unban
@@ -312,7 +327,7 @@ const AccountManagementPage = ({ onNavigate }) => {
                         <DialogHeader>
                             <DialogTitle>Update User Role</DialogTitle>
                             <DialogDescription>
-                                Change the role for {selectedUser?.fullName}
+                                Change the role for {selectedUser?.userName}
                             </DialogDescription>
                         </DialogHeader>
                         <div className="py-4">
@@ -348,18 +363,18 @@ const AccountManagementPage = ({ onNavigate }) => {
                     <AlertDialogContent>
                         <AlertDialogHeader>
                             <AlertDialogTitle>
-                                {userToBan?.status === 'active' ? 'Ban User' : 'Unban User'}
+                                {userToBan?.userStatus === 'Active' ? 'Ban User' : 'Unban User'}
                             </AlertDialogTitle>
                             <AlertDialogDescription>
-                                Are you sure you want to {userToBan?.status === 'active' ? 'ban' : 'unban'} {userToBan?.fullName}?
-                                {userToBan?.status === 'active' && ' This user will no longer be able to access their account.'}
+                                Are you sure you want to {userToBan?.userStatus === 'active' ? 'ban' : 'unban'} {userToBan?.userName}?
+                                {userToBan?.userStatus === 'active' && ' This user will no longer be able to access their account.'}
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
                             <AlertDialogAction
                                 onClick={handleBanToggle}
-                                className={userToBan?.status === 'active' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}
+                                className={userToBan?.userStatus === 'active' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}
                             >
                                 Confirm
                             </AlertDialogAction>

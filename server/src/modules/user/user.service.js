@@ -1,16 +1,5 @@
 const User = require('./user.model')
 
-
-// exports.getListUsers = async (req, res) => {
-//     try {
-//         const users = await User.find()
-//         res.status(200).json(users)
-//     } catch (err) {
-//         console.error(` Error: ${err}`)
-//         res.json({ message: `${err}` })
-//     }
-// }
-
 exports.getAllUser = async () => {
     try {
         return await User.find()

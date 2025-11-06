@@ -66,7 +66,7 @@ const AdminLayout = ({ children, currentPage, onNavigate, onLogout, currentUser 
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => onNavigate('home')}
+                            onClick={() => onNavigate('/')}
                         >
                             <HomeIcon className="w-4 h-4 mr-2" />
                             Back to Site
@@ -103,7 +103,7 @@ const AdminLayout = ({ children, currentPage, onNavigate, onLogout, currentUser 
                                         onNavigate(item.id);
                                         if (window.innerWidth < 1024) setSidebarOpen(false);
                                     }}
-                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive
+                                    className={`w-full flex items-center gap-3 cursor-pointer px-4 py-3 rounded-lg transition-colors ${isActive
                                         ? 'bg-[#14b8a6] text-white'
                                         : 'text-gray-700 hover:bg-gray-100'
                                         }`}
@@ -117,7 +117,7 @@ const AdminLayout = ({ children, currentPage, onNavigate, onLogout, currentUser 
                 </aside>
 
                 {/* Main Content */}
-                <main className="flex-1">
+                <main className="flex-1 ">
                     {children}
                 </main>
             </div>
