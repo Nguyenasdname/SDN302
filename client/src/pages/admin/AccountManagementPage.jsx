@@ -40,7 +40,7 @@ import { toast } from 'sonner';
 
 
 // Mock user data
-const mockUsers= [
+const mockUsers = [
     { id: 1, fullName: 'Nguyen Admin', email: 'nguyen@mybooking.com', role: 'admin', status: 'active', joinDate: '2024-01-15' },
     { id: 2, fullName: 'Thanh Customer', email: 'thanh@gmail.com', role: 'customer', status: 'active', joinDate: '2024-03-20' },
     { id: 3, fullName: 'Loi Employee', email: 'loi@mybooking.com', role: 'employee', status: 'active', joinDate: '2024-02-10' },
@@ -52,7 +52,7 @@ const mockUsers= [
 ];
 
 
-export function AccountManagementPage({ onNavigate }) {
+const AccountManagementPage = ({ onNavigate }) => {
     const [users, setUsers] = useState(mockUsers);
     const [searchQuery, setSearchQuery] = useState('');
     const [roleFilter, setRoleFilter] = useState('all');
@@ -370,3 +370,5 @@ export function AccountManagementPage({ onNavigate }) {
         </div>
     );
 }
+
+export default AccountManagementPage

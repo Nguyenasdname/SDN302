@@ -35,7 +35,7 @@ const availableAmenities = [
 ];
 
 
-export function ResortManagementPage({ onNavigate }) {
+const ResortManagementPage = ({ onNavigate }) => {
     const [resorts, setResorts] = useState(
         initialProperties.map(p => ({
             ...p,
@@ -444,3 +444,5 @@ export function ResortManagementPage({ onNavigate }) {
         </div>
     );
 }
+
+export default ResortManagementPage

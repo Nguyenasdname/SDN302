@@ -12,7 +12,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
-const Header = ({ currentPage, currentUser }) => {
+const Header = ({ currentPage }) => {
     const [isLogin, setIsLogin] = useState(false)
     const {
         data: user,
@@ -22,7 +22,7 @@ const Header = ({ currentPage, currentUser }) => {
         if (user) {
             setIsLogin(true)
         }
-    },[user])
+    }, [user])
 
     const handleLogout = () => {
         localStorage.removeItem('token')
@@ -57,7 +57,7 @@ const Header = ({ currentPage, currentUser }) => {
                     {/* Navigation */}
                     <nav className="hidden md:flex items-center gap-8">
                         <button
-                            onClick={() => navigate('home')}
+                            onClick={() => navigate('/')}
                             className={`transition-colors ${currentPage === 'home' ? 'text-[#14b8a6]' : 'text-gray-600 hover:text-[#14b8a6]'
                                 }`}
                         >
@@ -114,7 +114,7 @@ const Header = ({ currentPage, currentUser }) => {
                                     <>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem className='cursor-pointer'
-                                            onClick={() => navigate('admin-accounts')}>
+                                            onClick={() => navigate('admin-dashboard')}>
                                             <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path
                                                     strokeLinecap="round"

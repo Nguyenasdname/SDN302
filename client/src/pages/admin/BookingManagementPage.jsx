@@ -46,7 +46,7 @@ import {
 } from '../../components/ui/dropdown-menu';
 import { Label } from '../../components/ui/label';
 import { Textarea } from '../../components/ui/textarea';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 // Mock booking data
 const mockBookings = [
@@ -204,13 +204,13 @@ const mockBookings = [
 ];
 
 
-export function BookingManagementPage({ onNavigate }) {
+const BookingManagementPage = ({ onNavigate }) => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState < BookingStatus > ('all');
+    const [statusFilter, setStatusFilter] = useState('all');
     const [checkInDateFilter, setCheckInDateFilter] = useState('');
     const [checkOutDateFilter, setCheckOutDateFilter] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const [selectedBooking, setSelectedBooking] = useState < any > (null);
+    const [selectedBooking, setSelectedBooking] = useState(null);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [cancellationReason, setCancellationReason] = useState('');
@@ -757,3 +757,5 @@ export function BookingManagementPage({ onNavigate }) {
         </div>
     );
 }
+
+export default BookingManagementPage

@@ -60,10 +60,10 @@ const transactions = [
     { id: 'TXN008', bookingId: 'BK12352', customer: 'Bui Thi H', date: '2025-11-02', type: 'Spa Payment', amount: 920 },
 ];
 
-export function RevenueAnalyticsPage({ onNavigate }) {
+const RevenueAnalyticsPage = ({ onNavigate }) => {
     const [dateRange, setDateRange] = useState('last7days');
-    const [sortColumn, setSortColumn] = useState < string > ('date');
-    const [sortDirection, setSortDirection] = useState < 'asc' | 'desc' > ('desc');
+    const [sortColumn, setSortColumn] = useState('date');
+    const [sortDirection, setSortDirection] = useState('desc');
 
     const totalRevenue = 380000;
     const revenueChange = 5.2;
@@ -389,3 +389,5 @@ export function RevenueAnalyticsPage({ onNavigate }) {
         </div>
     );
 }
+
+export default RevenueAnalyticsPage

@@ -101,7 +101,7 @@ const mockServices= [
     },
 ];
 
-export function ServiceManagementPage({ onNavigate }) {
+const ServiceManagementPage = ({ onNavigate }) => {
     const [services, setServices] = useState (mockServices);
     const [searchQuery, setSearchQuery] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('all');
@@ -527,3 +527,5 @@ export function ServiceManagementPage({ onNavigate }) {
         </div>
     );
 }
+
+export default ServiceManagementPage

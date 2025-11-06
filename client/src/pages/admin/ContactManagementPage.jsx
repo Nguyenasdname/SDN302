@@ -46,7 +46,7 @@ import {
     TabsList,
     TabsTrigger,
 } from '../../components/ui/tabs';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { ScrollArea } from '../../components/ui/scroll-area';
 
 
@@ -192,7 +192,7 @@ const mockRefundRequests = [
 ];
 
 
-export function ContactManagementPage({ onNavigate }) {
+const ContactManagementPage = ({ onNavigate }) => {
     const [activeTab, setActiveTab] = useState('inquiries');
 
     // Inquiry states
@@ -827,3 +827,5 @@ export function ContactManagementPage({ onNavigate }) {
         </div>
     );
 }
+
+export default ContactManagementPage
