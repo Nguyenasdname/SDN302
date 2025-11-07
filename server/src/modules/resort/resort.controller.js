@@ -1,4 +1,7 @@
 const resortService = require('./resort.service');
+const resortService = require('../serviceResort/resort.service');
+const { uploadImageToCloudinary } = require('../cloudinary/cloudinary.service');
+const ImageResort = require('../imageResort/imageResort.model');
 // Lấy all resort
 exports.getAllResorts = async (req, res) => {
     try {
@@ -22,15 +25,60 @@ exports.getResortById = async (req, res) => {
     }
 };
 
-// Tạo mới resort
+    // Tạo mới resort
 exports.createResort = async (req, res) => {
-    try {
-        const { services, ...resortData } = req.body;
-        const newResort = await resortService.createResort({ ...resortData, services });
-        res.status(201).json(newResort);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+  try {
+    console.log('📦 Body:', req.body);
+    console.log('🖼 Files:', req.files);
+
+    const {
+      resortName,
+      resortDescription,
+      resortPrice,
+      resortLocation,
+      resortCapacity,
+      resortStatus
+    } = req.body;
+
+    // 1️⃣ Tạo resort trước
+    const newResort = await resortService.createResort({
+      resortName,
+      resortDescription,
+      resortPrice,
+      resortLocation,
+      resortCapacity,
+      resortStatus
+    });
+
+    // 2️⃣ Upload ảnh lên Cloudinary và lưu link
+    if (req.files && req.files.length > 0) {
+      for (let i = 0; i < req.files.length; i++) {
+        const file = req.files[i];
+        const customName = `${newResort._id}_${i + 1}`;
+
+        const imageUrl = await uploadImageToCloudinary(file.path, customName, 'resort-image');
+
+        const newImage = new ImageResort({
+          resortId: newResort._id,
+          imageUrl
+        });
+
+        await newImage.save();
+      }
     }
+
+    // 3️⃣ Lấy lại resort kèm ảnh
+    const resortWithImages = await resortService.getResortById(newResort._id);
+
+    res.status(201).json({
+      message: 'Resort created successfully!',
+      resort: resortWithImages
+    });
+
+  } catch (error) {
+    console.error('❌ Error creating resort:', error);
+    res.status(500).json({ message: error.message });
+  }
 };
 
 // Cập nhật resort

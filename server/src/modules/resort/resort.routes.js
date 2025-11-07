@@ -1,4 +1,6 @@
 const express = require('express');
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
 const router = express.Router();
 const resortController = require('./resort.controller');
 const { tokenProvider } = require('../../middlewares/authMiddleware');
@@ -11,7 +13,7 @@ router.get('/', resortController.getAllResorts);
 router.get('/:id', resortController.getResortById);
 
 // Tạo mới resort (chỉ employee)
-router.post('/', tokenProvider, allowRoles('employee'), resortController.createResort);
+router.post('/', tokenProvider, allowRoles('employee', 'admin'), upload.array('images'), resortController.createResort);
 
 // Cập nhật resort (chỉ employee)
 router.put('/:id', tokenProvider, allowRoles('employee'), resortController.updateResort);

@@ -6,7 +6,7 @@ cloudinary.config({
     api_key: env.cloudinaryApiKey,
     api_secret: env.cloudinaryApiSecret
 })
-
+//id resort + num
 exports.uploadImageToCloudinary = async (filePath, customName, folder = 'resort-image') => {
     try {
         const result = await cloudinary.uploader.upload(filePath, {
