@@ -9,6 +9,7 @@ import HomePage from '../pages/HomePage/HomePage';
 import MainLayout from '../layouts/MainLayout';
 import AdminPage from '../pages/AdminPage/AdminPage';
 import { useGet } from '../hooks/useGet';
+import ResortListPage from '../pages/ResortListPage';
 
 const AppRouter = () => {
     const {
@@ -26,6 +27,7 @@ const AppRouter = () => {
                 <Route path="/verify_link" element={<VerifyLinkPage />} />
                 <Route path="/change-password" element={<ChangePassword />} />
                 <Route path="/register" element={<RegisterPage />} />
+                <Route path='/list' element={<ResortListPage />} />
             </Routes>
         </Router>
     )
