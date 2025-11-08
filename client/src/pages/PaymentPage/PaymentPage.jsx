@@ -1,32 +1,107 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '../../components/ui/button';
 import { Card } from '../../components/ui/card';
-import { Shield, Clock, QrCode, CheckCircle, AlertCircle } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { Shield, Clock, QrCode, CheckCircle, AlertCircle, AwardIcon } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useGet } from '../../hooks/useGet';
+import { usePost } from '../../hooks/usePost';
+import { usePatch } from '../../hooks/usePatch';
 
 const PaymentPage = ({ onNavigate }) => {
     const [timeRemaining, setTimeRemaining] = useState(15 * 60); // 15 minutes in seconds
     const [paymentConfirmed, setPaymentConfirmed] = useState(false);
     const { state } = useLocation()
     const { bookingData, resortId, paymentType } = state
-
     const { data: resort, loading: resortLoading } = useGet(`/resort/${resortId}`)
     const { data: bookingService, loading: bookingServiceLoading } = useGet(`/bookingService/${bookingData._id}`)
+    const { postData } = usePost()
+    const { patchData } = usePatch()
+    const navigate = useNavigate()
+    const timerRef = useRef(null)
+
+    const depositAmount = Math.round(
+        paymentType === 'Deposit'
+            ? bookingData.bookingTotal * 0.3
+            : bookingData.bookingTotal
+    );
+    const deadline = new Date(Date.now() + timeRemaining * 1000);
+
+    const paymentInfor = `bookingID${bookingData._id}${paymentType === 'Deposit' ? 'Deposit' : 'Payment'}`
+
+    const QRUrl = `https://img.vietqr.io/image/OCB-CASS0903210704-compact.jpg?amount=${depositAmount}&addInfo=${paymentInfor}`
+
+    const handleConfirmPayment = async () => {
+        clearTimeout(timerRef.current);
+        setTimeRemaining(0);
+
+        if (paymentConfirmed) return;
+
+        setPaymentConfirmed(true);
+
+        try {
+            const paymentData = {
+                bookingId: bookingData._id,
+                paymentAmount: depositAmount,
+                paymentMethod: "QR code",
+                paymentStatus: paymentType === "Deposit" ? "Deposit" : "Payment",
+            };
+
+            const res = await postData("/payment", { paymentData });
+
+            if (paymentType === "Deposit") {
+                await patchData(`/booking/${bookingData._id}/confirm`, {
+                    depositAmount,
+                });
+            }
+
+            if (res) {
+                alert("Thanh toán thành công!");
+                navigate("/");
+                window.location.reload()
+            }
+        } catch (err) {
+            console.error("Lỗi khi xác nhận thanh toán:", err);
+        }
+    };
+
+    const checkPaid = async () => {
+        if (paymentConfirmed) return;
+
+        try {
+            const res = await fetch(
+                `https://script.google.com/macros/s/AKfycbxj-3eYlCmTW63LxUUPVi9QEUMA4kbb8tyWRoeVeslFY8Ymo0Yu6Sa_wmt3rQbfxrbP/exec`
+            );
+            const json = await res.json();
+            const transaction = json.data[json.data.length - 1];
+            const amount = transaction["Giá trị"];
+            const infor = transaction["Mô tả"];
+
+            console.log("Thông tin giao dịch:", infor);
+            console.log("Giá trị giao dịch:", amount);
+
+            if (depositAmount === Number(amount) && infor.includes(paymentInfor)) {
+                await handleConfirmPayment();
+            }
+        } catch (err) {
+            console.error("Lỗi khi kiểm tra thanh toán:", err);
+        }
+    };
 
     useEffect(() => {
-        const timer = setInterval(() => {
-            setTimeRemaining((prev) => {
-                if (prev <= 1) {
-                    clearInterval(timer);
-                    return 0;
-                }
-                return prev - 1;
-            });
+        if (paymentConfirmed || timeRemaining <= 0) {
+            clearTimeout(timerRef.current);
+            return;
+        }
+
+        timerRef.current = setTimeout(() => {
+            checkPaid();
+            setTimeRemaining((prev) => prev - 1);
         }, 1000);
 
-        return () => clearInterval(timer);
-    }, []);
+        // Cleanup mỗi lần render lại
+        return () => clearTimeout(timerRef.current);
+    }, [timeRemaining, paymentConfirmed]);
+
 
     if (resortLoading || bookingServiceLoading) {
         return (
@@ -40,25 +115,7 @@ const PaymentPage = ({ onNavigate }) => {
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
 
-    const handleConfirmPayment = () => {
-        setPaymentConfirmed(true);
 
-
-
-        setTimeout(() => {
-            onNavigate('confirmation', {
-                ...bookingData,
-                confirmationNumber,
-            });
-        }, 1500);
-    };
-
-    const depositAmount = paymentType === 'Deposit' ? bookingData.bookingTotal * 0.3 : bookingData.bookingTotal;
-    const deadline = new Date(Date.now() + timeRemaining * 1000);
-
-    const paymentInfor = `bookingID${bookingData._id}${paymentType === 'Deposit' ? 'Deposit' : 'Payment'}`
-
-    const QRUrl = `https://img.vietqr.io/image/OCB-CASS0903210704-compact.jpg?amount=${depositAmount}&addInfo=${paymentInfor}`
 
     return (
         <div className="container mx-auto px-6 py-12">
@@ -116,7 +173,7 @@ const PaymentPage = ({ onNavigate }) => {
                                 <div className="bg-white p-8 rounded-2xl border-4 border-[#14b8a6] inline-block mb-6">
                                     <div className="w-64 h-64 bg-gray-100 flex items-center justify-center rounded-lg">
                                         {/* QR Code Placeholder - In production, this would be a real QR code */}
-                                        <img src={QRUrl} className='w-full h-full'/>
+                                        <img src={QRUrl} className='w-full h-full' />
                                     </div>
                                 </div>
 
@@ -152,7 +209,7 @@ const PaymentPage = ({ onNavigate }) => {
                                         <div>
                                             <h4 className="mb-1">Confirm Payment</h4>
                                             <p className="text-sm text-gray-600">
-                                                Verify the amount (${depositAmount.toFixed(2)}) and complete the transfer
+                                                Verify the amount (${depositAmount}) and complete the transfer
                                             </p>
                                         </div>
                                     </div>
@@ -238,7 +295,7 @@ const PaymentPage = ({ onNavigate }) => {
                                         <div className="flex justify-between items-center mb-2">
                                             <span>30% Deposit (Due Now)</span>
                                             <span className="text-xl text-[#14b8a6]" style={{ fontFamily: 'var(--font-serif)' }}>
-                                                ${depositAmount.toFixed(2)}
+                                                ${depositAmount}
                                             </span>
                                         </div>
                                         <p className="text-sm text-gray-600">

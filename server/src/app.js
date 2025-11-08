@@ -13,6 +13,7 @@ const emailRouter = require('./modules/email/email.routes')
 // const feedbackRouter = require('./modules/feedback/feedback.routes')
 const bookingRouter = require('./modules/booking/booking.routes')
 const bookingServiceRouter = require('./modules/bookingService/bookingService.routes')
+const paymentRouter = require('./modules/payment/payment.routes')
 
 require('dotenv').config()
 connectDB()
@@ -22,7 +23,7 @@ app.use(express.json())
 
 app.use(cors({
     origin: 'http://localhost:5173',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
 }))
@@ -37,6 +38,7 @@ app.use('/wishlist', wishlistRouter)
 app.use('/email/', emailRouter)
 app.use('/booking', bookingRouter)
 app.use('/bookingService', bookingServiceRouter)
+app.use('/payment', paymentRouter)
 // app.use('/feedback', feedbackRouter)
 
 const PORT = process.env.PORT || 3000

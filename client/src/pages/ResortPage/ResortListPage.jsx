@@ -20,7 +20,7 @@ import { useLocation } from 'react-router-dom';
 
 
 export function ResortListPage({ onNavigate, wishlist, toggleWishlist }) {
-  const [priceRange, setPriceRange] = useState([0, 500]);
+  const [priceRange, setPriceRange] = useState([0, 20000]);
   const [selectedLocation, setSelectedLocation] = useState('');
   const [selectedType, setSelectedType] = useState([]);
   const [selectedAmenities, setSelectedAmenities] = useState([]);
@@ -126,8 +126,8 @@ export function ResortListPage({ onNavigate, wishlist, toggleWishlist }) {
               <Slider
                 value={priceRange}
                 onValueChange={setPriceRange}
-                max={500}
-                step={10}
+                max={20000}
+                step={100}
                 className="mb-2"
               />
               <div className="flex justify-between text-sm text-gray-600">

@@ -87,3 +87,17 @@ exports.getBookingByStatus = async (req, res) => {
         console.error(err)
     }
 }
+
+exports.confirmBooking = async (req, res) => {
+    const { bookingId } = req.params
+    const { depositAmount } = req.body
+    try {
+        const confirmBooking = await bookingService.confirmBooking(bookingId, depositAmount)
+        res.json({
+            message: 'Successful',
+            booking: confirmBooking
+        })
+    } catch (err) {
+        console.error(err)
+    }
+}

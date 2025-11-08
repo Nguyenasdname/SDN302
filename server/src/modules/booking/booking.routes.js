@@ -7,6 +7,7 @@ router.get('/', bookingController.getListBooking)
 router.get('/user', bookingController.getListBookingByUserId)
 router.get('/:bookingId', bookingController.getBookingDetails)
 router.post('/', authMiddleware.tokenProvider, bookingController.createNewBooking)
-router.put('/', bookingController.updateBooking)
+router.patch('/', bookingController.updateBooking)
+router.patch('/:bookingId/confirm', bookingController.confirmBooking)
 
 module.exports = router
