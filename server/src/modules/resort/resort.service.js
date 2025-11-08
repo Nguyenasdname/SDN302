@@ -1,50 +1,47 @@
 const Resort = require("./resort.model");
-const ServiceResort = require("../serviceResort/serviceResort.model");
+const ImageResort = require("../imageResort/imageResort.model"); 
 const Booking = require('../booking/boooking.model')
+const { uploadImageToCloudinary } = require("../cloudinary/cloudinary.service")
 
 // Lấy all resort
 exports.getAllResorts = async () => {
   try {
-    return await Resort.find()
-      .populate('services')
-      .sort({ createDate: -1 });
+    return await Resort.find().sort({ createDate: -1 });
   } catch (error) {
     throw error;
   }
 };
 
 // Lấy resort theo id
-exports.getResortById = async (id) => {
+
+exports.getResortById = async (resortId) => {
   try {
-    return await Resort.findById(id).populate('services');
+    const resort = await Resort.findById(resortId).lean();
+    if (!resort) return null;
+
+    const images = await ImageResort.find({ resortId })
+      .select("imageUrl -_id")
+      .lean();
+
+    return {
+      ...resort,
+      images: images.map(img => img.imageUrl), 
+    };
   } catch (error) {
     throw error;
   }
 };
 
-// Resort mới
+// Tạo resort
 exports.createResort = async (data) => {
-  try {
-    // Tạo resort
-    const newResort = new Resort(data);
-    await newResort.save();
+  const resort = await Resort.create(data);
+  return resort;
+};
 
-    // Tạo service resort
-    const serviceResort = []
-    for (const svc of data.services) {
-      const newServiceResort = new ServiceResort({ ...svc });
-      const savedServiceResort = await newServiceResort.save();
-      serviceResort.push(savedServiceResort._id);
-    }
-
-    // Gắn service resort vào resort
-    newResort.services = serviceResort;
-    await newResort.save();
-
-    return await newResort.populate('services');
-  } catch (error) {
-    throw error;
-  }
+// Thêm ảnh
+exports.addResortImage = async (resortId, imageUrl) => {
+  const image = await ImageResort.create({ resortId, imageUrl });
+  return image;
 };
 
 // Cập nhật resort
@@ -64,8 +61,8 @@ exports.deleteResort = async (id) => {
       throw new Error('Resort not found');
     }
 
-    // Xoá các service resort liên quan tới resort muốn xóa
-    await ServiceResort.deleteMany({ _id: { $in: resort.services } });
+    // Xóa ảnh liên quan
+    await ImageResort.deleteMany({ resortId: id });
 
     await Resort.findByIdAndDelete(id);
     return resort;
@@ -92,25 +89,43 @@ exports.checkAvailable = async (resortId, startDate, endDate) => {
   }
 }
 
-exports.getAvailableResorts = async (startDate, endDate, numberOfGuest) => {
-  const activeStatuses = ['pending', 'confirmed', 'checkIn', 'checkOut'];
-
+exports.getAvailableResorts = async (startDate, endDate, numberOfGuest = 1, searchQuery = '') => {
   try {
-    const bookedResorts = await Booking.find({
-      bookingStatus: { $in: activeStatuses },
-      $or: [
-        { checkIn: { $lt: endDate }, checkOut: { $gt: startDate } }
-      ]
-    }).distinct('resortId');
+    let bookedResorts = [];
 
-    const availableResorts = await Resort.find({
-      _id: { $nin: bookedResorts },
-      resortCapacity: { $gte: numberOfGuest }
-    })
+    // Nếu có ngày check-in/check-out mới lọc booking
+    if (startDate && endDate) {
+      const activeStatuses = ["pending", "confirmed", "checkIn", "checkOut"];
+      bookedResorts = await Booking.find({
+        bookingStatus: { $in: activeStatuses },
+        $or: [
+          { checkIn: { $lt: endDate }, checkOut: { $gt: startDate } }
+        ],
+      }).distinct("resortId");
+    }
 
-    return availableResorts
+    // Build query filter
+    const query = {
+      resortCapacity: { $gte: numberOfGuest },
+    };
 
-  } catch (err) {
-    console.error(err)
-  }
+    if (bookedResorts.length > 0) {
+      query._id = { $nin: bookedResorts };
+    }
+
+    if (searchQuery && searchQuery.trim() !== '') {
+  const regex = new RegExp(searchQuery, 'i'); // 'i' = case-insensitive
+  query.$or = [
+    { resortName: regex },
+    { resortDescription: regex }
+  ];
 }
+
+
+    const availableResorts = await Resort.find(query);
+    return availableResorts;
+  } catch (err) {
+    console.error('Error in getAvailableResorts:', err);
+    return [];
+  }
+};

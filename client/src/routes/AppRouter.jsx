@@ -9,6 +9,9 @@ import HomePage from '../pages/HomePage/HomePage';
 import MainLayout from '../layouts/MainLayout';
 import AdminPage from '../pages/AdminPage/AdminPage';
 import { useGet } from '../hooks/useGet';
+import { ResortListPage } from '../pages/ResortPage/ResortListPage';
+import { ResortDetailPage } from '../pages/ResortPage/ResortDetailPage';
+// import { ResortFormPage } from '../pages/ResortPage/ResortFormPage';
 
 const AppRouter = () => {
     const {
@@ -26,6 +29,9 @@ const AppRouter = () => {
                 <Route path="/verify_link" element={<VerifyLinkPage />} />
                 <Route path="/change-password" element={<ChangePassword />} />
                 <Route path="/register" element={<RegisterPage />} />
+                <Route path='/list' element={<ResortListPage />} />
+                <Route path='/resort-detail/:resortId' element={<ResortDetailPage />} />
+                {/* <Route path='/resort-form' element={<ResortFormPage currentUser={user} />} /> */}
             </Routes>
         </Router>
     )

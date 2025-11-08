@@ -6,7 +6,7 @@ require('dotenv').config()
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
 exports.generateTokenLogin = (user) => {
-    return jwt.sign({ id: user._id, role: user.userRole, status: user.userStatus }, secret, { expiresIn: '1d' })
+    return jwt.sign({ id: user._id, userRole: user.userRole, status: user.userStatus }, secret, { expiresIn: '1d' })
 }
 
 exports.verifyToken = (token) => {
