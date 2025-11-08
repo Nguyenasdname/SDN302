@@ -3,13 +3,13 @@ const { uploadImageToCloudinary } = require('../cloudinary/cloudinary.service');
 const ImageResort = require('../imageResort/imageResort.model');
 const Resort = require('./resort.model')
 // Lấy all resort
-exports.getAllResorts = async (req, res) => { 
-    try { 
-        const resorts = await resortService.getAllResorts(); 
-        res.status(200).json(resorts); 
-    } catch (error) { 
-        res.status(500).json({ message: error.message }); 
-    } 
+exports.getAllResorts = async (req, res) => {
+  try {
+    const resorts = await resortService.getAllResorts();
+    res.status(200).json(resorts);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 // Lấy chi tiết resort
@@ -41,7 +41,7 @@ exports.getResortById = async (req, res) => {
 };
 
 
-    // Tạo mới resort
+// Tạo mới resort
 exports.createResort = async (req, res) => {
   try {
     console.log('📦 Body:', req.body);
@@ -100,81 +100,92 @@ exports.createResort = async (req, res) => {
 
 // Cập nhật resort
 exports.updateResort = async (req, res) => {
-    try {
-        const resort = await Resort.findById(req.params.id);
-        if (!resort) {
-            return res.status(404).json({ message: 'Resort not found' });
-        }
-
-        if (req.user.userRole === 'employee' && resort.owner.toString() !== req.user.id) {
-            return res.status(403).json({ message: 'No Access' });
-        }
-
-        const updatedResort = await resortService.updateResort(req.params.id, req.body);
-        res.status(200).json(updatedResort);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+  try {
+    const resort = await Resort.findById(req.params.id);
+    if (!resort) {
+      return res.status(404).json({ message: 'Resort not found' });
     }
+
+    if (req.user.userRole === 'employee' && resort.owner.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'No Access' });
+    }
+
+    const updatedResort = await resortService.updateResort(req.params.id, req.body);
+    res.status(200).json(updatedResort);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 // Xoá resort
 exports.deleteResort = async (req, res) => {
-    try {
-        const deletedResort = await resortService.deleteResort(req.params.id);
-        if (!deletedResort) {
-            return res.status(404).json({ message: 'Resort not found' });
-        }
-        res.status(200).json({ message: 'Resort deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+  try {
+    const deletedResort = await resortService.deleteResort(req.params.id);
+    if (!deletedResort) {
+      return res.status(404).json({ message: 'Resort not found' });
     }
+    res.status(200).json({ message: 'Resort deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 exports.checkAvailable = async (req, res) => {
-    const resortId = req.query.resortId
-    const { startDate, endDate } = req.body
-    try {
-        const conflictBooking = await resortService.checkAvailable(resortId, startDate, endDate)
-        if (conflictBooking) {
-            return res.json({
-                message: `Conflict`,
-                conflictBooking
-            })
-        }
-
-        res.json({
-            message: `Available`,
-            startDate: startDate,
-            endDate: endDate
-        })
-    } catch (err) {
-        res.status(500).json({ message: err.message })
+  const resortId = req.query.resortId
+  const { startDate, endDate } = req.body
+  try {
+    const conflictBooking = await resortService.checkAvailable(resortId, startDate, endDate)
+    if (conflictBooking) {
+      return res.json({
+        message: `Conflict`,
+        conflictBooking
+      })
     }
+
+    res.json({
+      message: `Available`,
+      startDate: startDate,
+      endDate: endDate
+    })
+  } catch (err) {
+    res.status(500).json({ message: err.message })
+  }
 }
 
+// exports.getAvailableResorts = async (req, res) => {
+//   try {
+//     const { searchQuery, startDate, endDate, numberOfGuest } = req.body;
+
+//     // 1. Lọc resort theo searchQuery
+//     const resorts = await Resort.find({
+//       resortName: { $regex: searchQuery, $options: 'i' }
+//     });
+
+//     // 2. Lấy ảnh cho từng resort
+//     const resortsWithImages = await Promise.all(
+//       resorts.map(async resort => {
+//         const images = await ImageResort.find({ resortId: resort._id });
+//         return {
+//           ...resort.toObject(),
+//           images: images.map(img => img.imageUrl)
+//         };
+//       })
+//     );
+
+//     res.json(resortsWithImages);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// };
+
 exports.getAvailableResorts = async (req, res) => {
+  const { startDate, endDate, numberOfGuests } = req.body;
+
   try {
-    const { searchQuery, startDate, endDate, numberOfGuest } = req.body;
-
-    // 1. Lọc resort theo searchQuery
-    const resorts = await Resort.find({
-      resortName: { $regex: searchQuery, $options: 'i' }
-    });
-
-    // 2. Lấy ảnh cho từng resort
-    const resortsWithImages = await Promise.all(
-      resorts.map(async resort => {
-        const images = await ImageResort.find({ resortId: resort._id });
-        return {
-          ...resort.toObject(),
-          images: images.map(img => img.imageUrl)
-        };
-      })
-    );
-
-    res.json(resortsWithImages);
+    const resorts = await resortService.getAvailableResorts(startDate, endDate, numberOfGuests);
+    res.json(resorts);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: err.message });
   }
 };

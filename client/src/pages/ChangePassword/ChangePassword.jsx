@@ -20,13 +20,13 @@ const ChangePassword = () => {
             return
         }
 
-        if(newPassword !== checkPassword) {
+        if (newPassword !== checkPassword) {
             setError('Incorrect Confirm Password')
             return
         }
         const id = localStorage.getItem('id')
         try {
-            const res = await putData('/auth/change-password', { newPassword: newPassword, id: id })
+            const res = await putData('/auth/change-forgot-password', { newPassword: newPassword, id: id })
             if (!res) {
                 setError('Change Password Failed')
                 return

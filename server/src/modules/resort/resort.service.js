@@ -1,5 +1,5 @@
 const Resort = require("./resort.model");
-const ImageResort = require("../imageResort/imageResort.model"); 
+const ImageResort = require("../imageResort/imageResort.model");
 const Booking = require('../booking/boooking.model')
 const { uploadImageToCloudinary } = require("../cloudinary/cloudinary.service")
 
@@ -25,7 +25,7 @@ exports.getResortById = async (resortId) => {
 
     return {
       ...resort,
-      images: images.map(img => img.imageUrl), 
+      images: images.map(img => img.imageUrl),
     };
   } catch (error) {
     throw error;
@@ -89,43 +89,75 @@ exports.checkAvailable = async (resortId, startDate, endDate) => {
   }
 }
 
-exports.getAvailableResorts = async (startDate, endDate, numberOfGuest = 1, searchQuery = '') => {
+// exports.getAvailableResorts = async (startDate, endDate, numberOfGuest = 1, searchQuery = '') => {
+//   try {
+//     let bookedResorts = [];
+
+//     // Nếu có ngày check-in/check-out mới lọc booking
+//     if (startDate && endDate) {
+//       const activeStatuses = ["pending", "confirmed", "checkIn", "checkOut"];
+//       bookedResorts = await Booking.find({
+//         bookingStatus: { $in: activeStatuses },
+//         $or: [
+//           { checkIn: { $lt: endDate }, checkOut: { $gt: startDate } }
+//         ],
+//       }).distinct("resortId");
+//     }
+
+//     // Build query filter
+//     const query = {
+//       resortCapacity: { $gte: numberOfGuest },
+//     };
+
+//     if (bookedResorts.length > 0) {
+//       query._id = { $nin: bookedResorts };
+//     }
+
+//     if (searchQuery && searchQuery.trim() !== '') {
+//   const regex = new RegExp(searchQuery, 'i'); // 'i' = case-insensitive
+//   query.$or = [
+//     { resortName: regex },
+//     { resortDescription: regex }
+//   ];
+// }
+
+
+//     const availableResorts = await Resort.find(query);
+//     return availableResorts;
+//   } catch (err) {
+//     console.error('Error in getAvailableResorts:', err);
+//     return [];
+//   }
+// };
+
+exports.getAvailableResorts = async (startDate, endDate, numberOfGuests) => {
+  const activeStatuses = ['pending', 'confirmed', 'checkIn', 'checkOut'];
+
   try {
-    let bookedResorts = [];
-
-    // Nếu có ngày check-in/check-out mới lọc booking
-    if (startDate && endDate) {
-      const activeStatuses = ["pending", "confirmed", "checkIn", "checkOut"];
-      bookedResorts = await Booking.find({
-        bookingStatus: { $in: activeStatuses },
-        $or: [
-          { checkIn: { $lt: endDate }, checkOut: { $gt: startDate } }
-        ],
-      }).distinct("resortId");
+    // Nếu không có ngày thì trả về toàn bộ resort có sức chứa phù hợp
+    if (!startDate || !endDate) {
+      return await Resort.find({
+        resortCapacity: { $gte: numberOfGuests || 1 } // nếu không có số khách thì mặc định là 1
+      });
     }
 
-    // Build query filter
-    const query = {
-      resortCapacity: { $gte: numberOfGuest },
-    };
+    // Tìm các resort bị cấn lịch
+    const conflictedResorts = await Booking.find({
+      bookingStatus: { $in: activeStatuses },
+      $or: [
+        { checkIn: { $lt: endDate }, checkOut: { $gt: startDate } }
+      ]
+    }).distinct('resortId');
 
-    if (bookedResorts.length > 0) {
-      query._id = { $nin: bookedResorts };
-    }
+    // Trả về các resort không bị cấn và đủ sức chứa
+    const availableResorts = await Resort.find({
+      _id: { $nin: conflictedResorts },
+      resortCapacity: { $gte: numberOfGuests || 1 }
+    });
 
-    if (searchQuery && searchQuery.trim() !== '') {
-  const regex = new RegExp(searchQuery, 'i'); // 'i' = case-insensitive
-  query.$or = [
-    { resortName: regex },
-    { resortDescription: regex }
-  ];
-}
-
-
-    const availableResorts = await Resort.find(query);
     return availableResorts;
   } catch (err) {
-    console.error('Error in getAvailableResorts:', err);
-    return [];
+    console.error(err);
+    throw err;
   }
 };

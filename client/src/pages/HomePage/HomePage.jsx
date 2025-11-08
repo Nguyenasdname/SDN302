@@ -4,10 +4,17 @@ import PropertyCard from '../../components/PropertyCard'
 import { properties } from '../../lib/data';
 // import { Property } from '../../lib/data';
 import { ImageWithFallback } from '../../components/ImageWithFallBack'
+import { useGet } from '../../hooks/useGet';
 
 
 const HomePage = ({ onNavigate, wishlist, toggleWishlist }) => {
-    const featuredProperties = properties.slice(0, 3);
+    const { data: resorts, loading: resortLoading } = useGet('/resort')
+    if (resortLoading) {
+        return (
+            <div>Loading...</div>
+        )
+    }
+    const featuredProperties = resorts.slice(0, 3);
 
     return (
         <div>
@@ -59,10 +66,10 @@ const HomePage = ({ onNavigate, wishlist, toggleWishlist }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {featuredProperties.map((property) => (
                         <PropertyCard
-                            key={property.id}
-                            property={property}
+                            key={property._id}
+                            resort={property}
                             onBook={(property) => onNavigate('details', property)}
-                            toggleWishlist={toggleWishlist}
+                            toggleWishlist={true}
                         />
                     ))}
                 </div>
