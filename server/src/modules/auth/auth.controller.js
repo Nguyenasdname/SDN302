@@ -141,7 +141,7 @@ exports.verifyLinkToken = async (req, res) => {
     }
 }
 
-exports.changePassword = async (req, res) => {
+exports.changeFogotPassword = async (req, res) => {
     const { newPassword, id } = req.body
     try {
         const user = await User.findById(id)
@@ -151,6 +151,30 @@ exports.changePassword = async (req, res) => {
     } catch (err) {
         console.error(err)
     }
+}
+
+exports.changePassword = async (req, res) => {
+    const userId = req.user.id
+    const { currentPassword, newPassword } = req.body
+
+    try {
+        const user = await User.findById(userId)
+        if (!user.userPass) {
+            user.userPass = newPassword
+            await user.save();
+            return res.json({ message: `Successful` })
+        }
+        if (!await user.comparePassword(currentPassword)) {
+            return res.status(401).json({ message: 'Your confirm password are not correct!' })
+        }
+        user.userPass = newPassword
+        await user.save()
+        res.json({ message: `Successful` })
+
+    } catch (err) {
+        console.error(err)
+    }
+
 }
 
 exports.register = async (req, res) => {

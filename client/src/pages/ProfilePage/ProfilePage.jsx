@@ -32,11 +32,7 @@ import { useNavigate } from 'react-router-dom';
 import { useGet } from '../../hooks/useGet';
 
 
-const ProfilePage = ({ onNavigate, wishlist, toggleWishlist }) => {
-    const {
-        data: user,
-        loading
-    } = useGet('/user/profile')
+const ProfilePage = ({ onNavigate, wishlist, toggleWishlist, currentUser }) => {
 
     const [activeTab, setActiveTab] = useState('bookings');
     const [userBookings, setUserBookings] = useState([]);
@@ -78,13 +74,6 @@ const ProfilePage = ({ onNavigate, wishlist, toggleWishlist }) => {
         setCancellationReason('');
         setSelectedBooking(null);
     };
-    if (loading) {
-        return (
-            <div>loading...</div>
-        )
-    } else {
-        console.log(user)
-    }
 
     return (
 
@@ -103,15 +92,15 @@ const ProfilePage = ({ onNavigate, wishlist, toggleWishlist }) => {
                         <div className="text-center mb-6">
                             <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden border-4 border-[#14b8a6]">
                                 <ImageWithFallback
-                                    src={user.userImg}
-                                    alt={user.userName}
+                                    src={currentUser.userImg}
+                                    alt={currentUser.userName}
                                     className="w-full h-full object-cover"
                                 />
                             </div>
                             <h3 className="mb-1" style={{ fontFamily: 'var(--font-serif)' }}>
-                                {user.userName}
+                                {currentUser.userName}
                             </h3>
-                            <p className="text-gray-600 text-sm">{user.userEmail}</p>
+                            <p className="text-gray-600 text-sm">{currentUser.userEmail}</p>
                         </div>
 
                         {/* Navigation Menu */}

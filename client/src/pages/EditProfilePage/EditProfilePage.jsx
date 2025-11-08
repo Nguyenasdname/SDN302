@@ -6,29 +6,76 @@ import { Label } from '../../components/ui/label';
 import { mockUser } from '../../lib/data';
 import { ImageWithFallback } from '../../components/ImageWithFallBack';
 import { Camera, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { usePatch } from '../../hooks/usePatch';
 
 
-const EditProfilePage = ({ onNavigate }) => {
+const EditProfilePage = ({ onNavigate, currentUser }) => {
     const [formData, setFormData] = useState({
-        name: mockUser.name,
-        email: mockUser.email,
-        phone: mockUser.phone,
+        userName: currentUser.userName,
+        userEmail: currentUser.userEmail,
+        userPhone: currentUser.userPhone,
         currentPassword: '',
         newPassword: '',
         confirmPassword: '',
     });
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        alert('Profile updated successfully!');
-        onNavigate('profile');
+
+    const navigate = useNavigate()
+
+    const [error, setError] = useState({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+    })
+    const { patchData, error: errorPatch } = usePatch()
+
+    const handleSubmit = async (e) => {
+        const newErrors = {
+            currentPassword: '',
+            newPassword: '',
+            confirmPassword: '',
+        }
+
+        let hasError = false
+
+        if (newPassword !== confirmPassword) {
+            newErrors.confirmPassword = 'Password Do not match'
+            hasError = true
+        }
+
+        setError(newErrors)
+
+        if (hasError) {
+            return
+        }
+
+        if (formData.currentPassword === '' || formData.newPassword === '' || formData.confirmPassword === '') {
+            return
+        } else {
+            try {
+                const res = await patchData('/auth/change-password', {
+                    currentPassword: formData.currentPassword,
+                    newPassword: formData.newPassword
+                })
+                if (res) {
+                    alert('Successful')
+                }
+            } catch (err) {
+                setError(prev => ({
+                    ...prev,
+                    currentPassword: errorPatch?.response?.data?.message || 'Something went wrong'
+                }));
+            }
+        }
+
     };
 
     return (
         <div className="container mx-auto px-6 py-12">
             {/* Back Button */}
             <button
-                onClick={() => onNavigate('profile')}
+                onClick={() => navigate('/profile')}
                 className="flex items-center gap-2 text-gray-600 hover:text-[#14b8a6] transition-colors mb-6"
             >
                 <ArrowLeft className="w-5 h-5" />
@@ -51,7 +98,7 @@ const EditProfilePage = ({ onNavigate }) => {
                             <div className="relative">
                                 <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-[#14b8a6]">
                                     <ImageWithFallback
-                                        src={mockUser.avatar}
+                                        src={currentUser.userImg}
                                         alt={mockUser.name}
                                         className="w-full h-full object-cover"
                                     />
@@ -86,8 +133,8 @@ const EditProfilePage = ({ onNavigate }) => {
                                 <Label htmlFor="name">Full Name</Label>
                                 <Input
                                     id="name"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    value={formData.userName}
+                                    onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
                                     className="mt-2"
                                 />
                             </div>
@@ -97,8 +144,8 @@ const EditProfilePage = ({ onNavigate }) => {
                                 <Input
                                     id="email"
                                     type="email"
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    value={formData.userEmail}
+                                    onChange={(e) => setFormData({ ...formData, userEmail: e.target.value })}
                                     className="mt-2"
                                 />
                             </div>
@@ -108,8 +155,8 @@ const EditProfilePage = ({ onNavigate }) => {
                                 <Input
                                     id="phone"
                                     type="tel"
-                                    value={formData.phone}
-                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                    value={formData.userPhone}
+                                    onChange={(e) => setFormData({ ...formData, userPhone: e.target.value })}
                                     className="mt-2"
                                 />
                             </div>
@@ -135,6 +182,9 @@ const EditProfilePage = ({ onNavigate }) => {
                                     placeholder="Enter current password"
                                     className="mt-2"
                                 />
+                                {error.currentPassword && (
+                                    <p className='text-red-500 text-sm mt-1'>{error.currentPassword}</p>
+                                )}
                             </div>
 
                             <div>
@@ -163,6 +213,9 @@ const EditProfilePage = ({ onNavigate }) => {
                                     placeholder="Confirm new password"
                                     className="mt-2"
                                 />
+                                {error.confirmPassword && (
+                                    <p className='text-red-500 text-sm mt-1'>{error.confirmPassword}</p>
+                                )}
                             </div>
                         </div>
                     </Card>

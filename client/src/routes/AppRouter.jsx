@@ -14,7 +14,7 @@ import EditProfilePage from '../pages/EditProfilePage/EditProfilePage';
 
 const AppRouter = () => {
     const {
-        user, loading
+        data: user, loading
     } = useGet('/user/profile')
 
     if (loading) {
@@ -32,8 +32,8 @@ const AppRouter = () => {
                 <Route path="/verify_link" element={<VerifyLinkPage />} />
                 <Route path="/change-password" element={<ChangePassword />} />
                 <Route path="/register" element={<RegisterPage />} />
-                <Route path='/profile' element={<MainLayout><ProfilePage /></MainLayout>} />
-                <Route path='/profile/editProfile' element={<MainLayout><EditProfilePage /></MainLayout>} />
+                <Route path='/profile' element={<MainLayout><ProfilePage currentUser={user} /></MainLayout>} />
+                <Route path='/profile/editProfile' element={<MainLayout><EditProfilePage currentUser={user} /></MainLayout>} />
             </Routes>
         </Router>
     )
