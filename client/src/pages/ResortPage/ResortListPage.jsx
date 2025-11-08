@@ -16,6 +16,7 @@ import {
 } from '../../components/ui/select';
 import SearchBar from '../../components/SearchBar.jsx';
 import { usePost } from '../../hooks/usePost.js';
+import { useLocation } from 'react-router-dom';
 
 
 export function ResortListPage({ onNavigate, wishlist, toggleWishlist }) {
@@ -26,7 +27,6 @@ export function ResortListPage({ onNavigate, wishlist, toggleWishlist }) {
   const [sortBy, setSortBy] = useState('popularity');
   const [resorts, setResort] = useState([])
   const { postData, loading: resortLoading } = usePost()
-
 
   const toggleType = (type) => {
     setSelectedType((prev) =>
@@ -52,30 +52,17 @@ export function ResortListPage({ onNavigate, wishlist, toggleWishlist }) {
   }, [])
 
 
-  const handleSearhBar = async ({ checkIn, checkOut, guests }) => {
+  const handleSearhBar = async ({ checkIn, checkOut, guests, checkInTime, checkOutTime }) => {
     const res = await postData('/resort/available', {
-      startDate: checkIn,
-      endDate: checkOut,
-      numberOfGuest: parseInt(guests)
+      startDate: `${checkIn}T${checkInTime || '00:00'}`,
+      endDate: `${checkOut}T${checkOutTime || '00:00'}`,
+      numberOfGuests: parseInt(guests)
     })
 
     if (res) {
       setResort(res)
     }
   }
-
-
-
-  // let filteredProperties = resorts.filter((property) => {
-  //   const matchesPrice = property.price >= priceRange[0] && property.price <= priceRange[1];
-  //   const matchesLocation = !selectedLocation || property.location === selectedLocation;
-  //   const matchesType = selectedType.length === 0 || selectedType.includes(property.type);
-  //   const matchesAmenities =
-  //     selectedAmenities.length === 0 ||
-  //     selectedAmenities.every((amenity) => property.amenities.includes(amenity));
-
-  //   return matchesPrice && matchesLocation && matchesType && matchesAmenities;
-  // });
 
   let filteredProperties = resorts.filter((property) => {
     const matchesPrice =

@@ -1,21 +1,10 @@
 const ServiceResort = require('./serviceResort.model')
 const Resort = require('../resort/resort.model')
 
-// Lấy all services của 1 resort
-exports.getServicesByResortId = async (resortId) => {    
-    try {
-        return await ServiceResort.find({ resortId })
-        .populate('resortId', 'resortName resortLocation')
-    } catch (error) {
-        throw error;
-    }   
-};
-
 // Lấy all service 
 exports.getAllServicesResort = async () => {    
     try {
         return await ServiceResort.find()
-        .populate('resortId', 'resortName resortLocation')
         .sort({ createDate: -1 });
     } catch (error) {
         throw error;

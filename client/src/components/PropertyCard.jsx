@@ -2,16 +2,18 @@ import { Star, MapPin, Users, Bed, Bath, Heart } from 'lucide-react';
 import { Card } from './ui/card';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { Button } from './ui/button';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const PropertyCard = ({ resort, onBook, isWishlisted = true, toggleWishlist }) => {
+    const navigate = useNavigate()
+
     const handleWishlistClick = (e) => {
         e.stopPropagation();
         if (toggleWishlist) {
             toggleWishlist(resort._id); // dùng _id từ MongoDB
         }
     };
-    const navigate = useNavigate()
+
 
     return (
         <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group"

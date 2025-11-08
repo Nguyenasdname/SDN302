@@ -47,7 +47,9 @@ exports.createNewBooking = async (req, res) => {
         const userId = req.user.id
         const { bookingData, bookingServiceData } = req.body
         const newBooking = await bookingService.createNewBooking(bookingData, userId)
-        await bookingServiceService.addOrUpdateBookingService(newBooking._id, bookingServiceData)
+        if (bookingServiceData) {
+            await bookingServiceService.addOrUpdateBookingService(newBooking._id, bookingServiceData)
+        }
         res.json({
             message: 'Successful!',
             newBooking
