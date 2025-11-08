@@ -2,6 +2,7 @@ import { Star, MapPin, Users, Bed, Bath, Heart } from 'lucide-react';
 import { Card } from './ui/card';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { Button } from './ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const PropertyCard = ({ resort, onBook, isWishlisted = true, toggleWishlist }) => {
     const handleWishlistClick = (e) => {
@@ -10,12 +11,14 @@ const PropertyCard = ({ resort, onBook, isWishlisted = true, toggleWishlist }) =
             toggleWishlist(resort._id); // dùng _id từ MongoDB
         }
     };
+    const navigate = useNavigate()
 
     return (
-        <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group">
+        <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group"
+            onClick={() => navigate(`/resort-detail/${resort._id}`)}>
             <div
                 className="relative h-64 overflow-hidden"
-                onClick={() => onBook(resort)}
+
             >
                 <ImageWithFallback
                     src={resort.resortIMG || '/placeholder.jpg'} // resort.image giả định hoặc fallback
@@ -86,17 +89,12 @@ const PropertyCard = ({ resort, onBook, isWishlisted = true, toggleWishlist }) =
                         <span className="text-gray-500"> / night</span>
                     </div>
                     <Button
-                        onClick={() => onBook(resort)}
+                        onClick={() => navigate(`/resort-detail/${resort._id}`)}
                         style={{
                             backgroundColor: '#fbbf24',
                             color: '#000',
                         }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = '#f59e0b';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = '#fbbf24';
-                        }}
+                        className="cursor-pointer hover:scale-110 transition duration-500"
                     >
                         View Details
                     </Button>

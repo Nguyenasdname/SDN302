@@ -115,7 +115,7 @@ export function ResortListPage({ onNavigate, wishlist, toggleWishlist }) {
   return (
     <div className="container mx-auto px-6 py-12 relative">
 
-      <div className="absolute bottom-20 left-0 right-0 top-10 px-6">
+      <div className="absolute left-0 right-0 top-10 px-6">
         <SearchBar onSearch={handleSearhBar} />
       </div>
 
