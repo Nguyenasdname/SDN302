@@ -12,6 +12,7 @@ const wishlistRouter = require('./modules/wishlist/wishlist.routes')
 const emailRouter = require('./modules/email/email.routes')
 // const feedbackRouter = require('./modules/feedback/feedback.routes')
 const bookingRouter = require('./modules/booking/booking.routes')
+const bookingServiceRouter = require('./modules/bookingService/bookingService.routes')
 
 require('dotenv').config()
 connectDB()
@@ -35,6 +36,7 @@ app.use('/promotion', promotionRouter)
 app.use('/wishlist', wishlistRouter)
 app.use('/email/', emailRouter)
 app.use('/booking', bookingRouter)
+app.use('/bookingService', bookingServiceRouter)
 // app.use('/feedback', feedbackRouter)
 
 const PORT = process.env.PORT || 3000

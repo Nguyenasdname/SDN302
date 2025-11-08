@@ -156,7 +156,13 @@ const BookingRoomPage = ({ onNavigate, currentUser }) => {
                 bookingServiceData
             })
             if (res) {
-                alert(res.newBooking)
+                navigate('/payment', {
+                    state: {
+                        bookingData: res.newBooking,
+                        resortId,
+                        paymentType: 'Deposit'
+                    }
+                })
             }
         } catch (err) {
             console.log(err)
