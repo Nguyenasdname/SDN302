@@ -7,11 +7,35 @@ const SearchBar = ({ onSearch }) => {
     const [checkIn, setCheckIn] = useState('');
     const [checkOut, setCheckOut] = useState('');
     const [guests, setGuests] = useState('');
+    const [checkInTime, setCheckInTime] = useState('');
+    const [checkOutTime, setCheckOutTime] = useState('');
+
+    const handleSearch = () => {
+        const now = new Date()
+        const checkInDateTime = new Date(`${checkIn}T${checkInTime || '00:00'}`);
+        const checkOutDateTime = new Date(`${checkOut}T${checkOutTime || '00:00'}`);
+
+        // Validate check-in date: must be today or later
+        if (checkInDateTime < now.setHours(0, 0, 0, 0)) {
+            alert('Check-in date must be today or later.');
+            return;
+        }
+
+        // Validate check-out
+        if (checkOutDateTime <= checkInDateTime) {
+            alert('Check-out must be after check-in.');
+            return;
+        }
+
+        // All good, proceed
+        onSearch({ checkIn, checkOut, guests, checkInTime, checkOutTime });
+    }
+
 
     return (
         <div className="bg-white rounded-3xl shadow-xl p-6 max-w-5xl mx-auto">
             <div className="flex items-center gap-0">
-                {/* Check-in Date */}
+                {/* Check-in Date & Time */}
                 <div className="flex items-center gap-3 px-6 py-2 flex-1 border-r border-gray-200">
                     <Calendar className="w-6 h-6 text-[#14b8a6] flex-shrink-0" />
                     <div className="flex-1">
@@ -20,13 +44,18 @@ const SearchBar = ({ onSearch }) => {
                             type="date"
                             value={checkIn}
                             onChange={(e) => setCheckIn(e.target.value)}
+                            className="w-full border-none outline-none bg-transparent text-gray-900 cursor-pointer mb-1"
+                        />
+                        <input
+                            type="time"
+                            value={checkInTime}
+                            onChange={(e) => setCheckInTime(e.target.value)}
                             className="w-full border-none outline-none bg-transparent text-gray-900 cursor-pointer"
-                            placeholder="Add date"
                         />
                     </div>
                 </div>
 
-                {/* Check-out Date */}
+                {/* Check-out Date & Time */}
                 <div className="flex items-center gap-3 px-6 py-2 flex-1 border-r border-gray-200">
                     <Calendar className="w-6 h-6 text-[#14b8a6] flex-shrink-0" />
                     <div className="flex-1">
@@ -35,12 +64,16 @@ const SearchBar = ({ onSearch }) => {
                             type="date"
                             value={checkOut}
                             onChange={(e) => setCheckOut(e.target.value)}
+                            className="w-full border-none outline-none bg-transparent text-gray-900 cursor-pointer mb-1"
+                        />
+                        <input
+                            type="time"
+                            value={checkOutTime}
+                            onChange={(e) => setCheckOutTime(e.target.value)}
                             className="w-full border-none outline-none bg-transparent text-gray-900 cursor-pointer"
-                            placeholder="Add date"
                         />
                     </div>
                 </div>
-
                 {/* Guests */}
                 <div className="flex items-center gap-3 px-6 py-2 flex-1">
                     <Users className="w-6 h-6 text-[#14b8a6] flex-shrink-0" />
@@ -67,8 +100,8 @@ const SearchBar = ({ onSearch }) => {
                 {/* Search Button */}
                 <div className="pl-4">
                     <Button
-                        onClick={() => onSearch({ checkIn, checkOut, guests })}
-                        className="px-8 py-6 rounded-2xl shadow-md hover:shadow-lg transition-all"
+                        onClick={handleSearch}
+                        className="px-8 py-6 rounded-2xl shadow-md hover:shadow-lg hover:scale-110 transition duration-500 cursor-pointer"
                         style={{
                             backgroundColor: '#fbbf24',
                             color: '#000',

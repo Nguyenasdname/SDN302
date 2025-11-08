@@ -47,7 +47,9 @@ exports.createNewBooking = async (req, res) => {
         const userId = req.user.id
         const { bookingData, bookingServiceData } = req.body
         const newBooking = await bookingService.createNewBooking(bookingData, userId)
-        await bookingServiceService.addOrUpdateBookingService(newBooking._id, bookingServiceData)
+        if (bookingServiceData) {
+            await bookingServiceService.addOrUpdateBookingService(newBooking._id, bookingServiceData)
+        }
         res.json({
             message: 'Successful!',
             newBooking
@@ -80,6 +82,20 @@ exports.getBookingByStatus = async (req, res) => {
         res.status(200).json({
             message: `Successfully!`,
             bookingList
+        })
+    } catch (err) {
+        console.error(err)
+    }
+}
+
+exports.confirmBooking = async (req, res) => {
+    const { bookingId } = req.params
+    const { depositAmount } = req.body
+    try {
+        const confirmBooking = await bookingService.confirmBooking(bookingId, depositAmount)
+        res.json({
+            message: 'Successful',
+            booking: confirmBooking
         })
     } catch (err) {
         console.error(err)

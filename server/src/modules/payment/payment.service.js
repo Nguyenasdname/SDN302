@@ -39,7 +39,7 @@ exports.createPayment = async (paymentData, userId) => {
             ...paymentData
         })
 
-        return await Payment.save()
+        return await newPayment.save()
     } catch (err) {
         console.error(err)
     }

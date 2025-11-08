@@ -56,9 +56,10 @@ exports.getAllPaymentByBookingId = async (req, res) => {
 }
 
 exports.createPayment = async (req, res) => {
+    const userId = req.user.id
     try {
-        const paymentData = req.body
-        const newPayment = await paymentService.createPayment(paymentData)
+        const { paymentData } = req.body
+        const newPayment = await paymentService.createPayment(paymentData, userId)
         res.status(200).json({
             message: `Successful!`,
             newPayment

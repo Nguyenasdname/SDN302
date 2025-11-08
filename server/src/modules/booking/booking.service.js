@@ -60,3 +60,14 @@ exports.getBookingByStatus = async (status) => {
         console.error(err)
     }
 }
+
+exports.confirmBooking = async (bookingId, depositAmount) => {
+    try {
+        const booking = await Booking.findById(bookingId)
+        booking.status = 'confirmed'
+        booking.bookingTotal -= depositAmount
+        return await booking.save()
+    } catch (err) {
+        console.error(err)
+    }
+}
