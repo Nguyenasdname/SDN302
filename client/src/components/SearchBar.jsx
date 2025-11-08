@@ -67,7 +67,7 @@ const SearchBar = ({ onSearch }) => {
                 {/* Search Button */}
                 <div className="pl-4">
                     <Button
-                        onClick={onSearch}
+                        onClick={() => onSearch({ checkIn, checkOut, guests })}
                         className="px-8 py-6 rounded-2xl shadow-md hover:shadow-lg transition-all"
                         style={{
                             backgroundColor: '#fbbf24',

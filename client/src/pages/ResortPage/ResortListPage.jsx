@@ -1,193 +1,254 @@
-import React, { useEffect, useState } from 'react';
-import { Search, Star, MapPin } from 'lucide-react';
-import { Input } from '../../components/ui/input';
-import { Button } from '../../components/ui/button';
-import { Badge } from '../../components/ui/badge';
-import api from '../../api';
-import debounce from 'lodash.debounce';
-import { useNavigate } from 'react-router-dom';
+"use client";
 
-export function ResortListPage() {
-  const navigate = useNavigate();
-  const [resorts, setResorts] = useState([]);
-  const [loading, setLoading] = useState(true);
+import { useEffect, useState } from 'react';
+import PropertyCard from '../../components/PropertyCard';
+import { properties } from '../../lib/data.js';
+import { Slider } from '../../components/ui/slider';
+import { Checkbox } from '../../components/ui/checkbox';
+import { Label } from '../../components/ui/label';
+import { useGet } from '../../hooks/useGet';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../components/ui/select';
+import SearchBar from '../../components/SearchBar.jsx';
+import { usePost } from '../../hooks/usePost.js';
 
-  const [searchQuery, setSearchQuery] = useState('');
-const [debouncedQuery, setDebouncedQuery] = useState('');
-  const [checkin, setCheckin] = useState('');
-  const [checkout, setCheckout] = useState('');
-  const [numberOfGuest, setNumberOfGuest] = useState(1);
+
+export function ResortListPage({ onNavigate, wishlist, toggleWishlist }) {
+  const [priceRange, setPriceRange] = useState([0, 500]);
+  const [selectedLocation, setSelectedLocation] = useState('');
+  const [selectedType, setSelectedType] = useState([]);
+  const [selectedAmenities, setSelectedAmenities] = useState([]);
+  const [sortBy, setSortBy] = useState('popularity');
+  const [resorts, setResort] = useState([])
+  const { postData, loading: resortLoading } = usePost()
+
+
+  const toggleType = (type) => {
+    setSelectedType((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+    );
+  };
+
+  const toggleAmenity = (amenity) => {
+    setSelectedAmenities((prev) =>
+      prev.includes(amenity) ? prev.filter((a) => a !== amenity) : [...prev, amenity]
+    );
+  };
 
   useEffect(() => {
-  const handler = setTimeout(() => {
-    setDebouncedQuery(searchQuery);
-  }, 500); // 500ms sau khi ngừng gõ
-
-  return () => clearTimeout(handler);
-}, [searchQuery]);
-
-useEffect(() => {
-  const loadResorts = async () => {
-    setLoading(true);
-    try {
-      const { data } = await api.post('/resort/available', {
-        searchQuery: debouncedQuery,
-        startDate: checkin,
-        endDate: checkout,
-        numberOfGuest
-      });
-      setResorts(data);
-    } catch (err) {
-      console.error(err);
+    const fetchInitialResort = async () => {
+      const res = await postData('/resort/available', {})
+      if (res) {
+        setResort(res)
+        console.log(res)
+      }
     }
-    setLoading(false);
-  };
-  loadResorts();
-}, [debouncedQuery, checkin, checkout, numberOfGuest]);
+    fetchInitialResort()
+  }, [])
 
 
-  if (loading) return <div className="text-center py-20">Đang tải resort...</div>;
+  const handleSearhBar = async ({ checkIn, checkOut, guests }) => {
+    const res = await postData('/resort/available', {
+      startDate: checkIn,
+      endDate: checkOut,
+      numberOfGuest: parseInt(guests)
+    })
 
-  const clearFilters = () => {
-    setSearchQuery('');
-    setCheckin('');
-    setCheckout('');
-    setNumberOfGuest(1);
-  };
+    if (res) {
+      setResort(res)
+    }
+  }
+
+
+
+  // let filteredProperties = resorts.filter((property) => {
+  //   const matchesPrice = property.price >= priceRange[0] && property.price <= priceRange[1];
+  //   const matchesLocation = !selectedLocation || property.location === selectedLocation;
+  //   const matchesType = selectedType.length === 0 || selectedType.includes(property.type);
+  //   const matchesAmenities =
+  //     selectedAmenities.length === 0 ||
+  //     selectedAmenities.every((amenity) => property.amenities.includes(amenity));
+
+  //   return matchesPrice && matchesLocation && matchesType && matchesAmenities;
+  // });
+
+  let filteredProperties = resorts.filter((property) => {
+    const matchesPrice =
+      typeof property.resortPrice === 'number' &&
+      property.resortPrice >= priceRange[0] &&
+      property.resortPrice <= priceRange[1];
+
+    const matchesLocation =
+      selectedLocation === '' ||
+      selectedLocation === 'all' ||
+      property.resortLocation === selectedLocation;
+
+    const matchesType =
+      selectedType.length === 0 || selectedType.includes(property.type); // <-- bạn tự xử lý nếu cần
+
+    const matchesAmenities =
+      selectedAmenities.length === 0 ||
+      (Array.isArray(property.amenities) &&
+        selectedAmenities.every((amenity) => property.amenities.includes(amenity))); // <-- bạn tự xử lý nếu cần
+
+    return matchesPrice && matchesLocation && matchesType && matchesAmenities;
+  });
+
+
+  filteredProperties = [...filteredProperties].sort((a, b) => {
+    switch (sortBy) {
+      case 'price-low':
+        return a.price - b.price;
+      case 'price-high':
+        return b.price - a.price;
+      case 'popularity':
+      default:
+        return b.rating - a.rating;
+    }
+  });
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
-      {/* Hero */}
-      <div className="bg-gradient-to-r from-[#14b8a6] to-[#0d9488] text-white py-16">
-        <div className="container mx-auto px-6">
-          <div className="max-w-3xl">
-            <h1 className="text-5xl mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
-              Khám Phá Resort Cao Cấp
-            </h1>
-            <p className="text-xl opacity-90">Tìm resort lý tưởng cho kỳ nghỉ của bạn</p>
-          </div>
-        </div>
+    <div className="container mx-auto px-6 py-12 relative">
+
+      <div className="absolute bottom-20 left-0 right-0 top-10 px-6">
+        <SearchBar onSearch={handleSearhBar} />
       </div>
 
-      <div className="container mx-auto px-6 py-8">
-        {/* Search & Filters */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 -mt-16 mb-8 relative z-10">
-          <div className="grid md:grid-cols-4 gap-4">
-            {/* Search */}
-            <div className="md:col-span-2">
-              <label className="block text-sm mb-2">Tìm kiếm</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <Input
-                  placeholder="Tên resort hoặc mô tả..."
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
+      <h1 className="text-4xl md:text-5xl mb-8 mt-40" style={{ fontFamily: 'var(--font-serif)' }}>
+        Resorts & Rooms
+      </h1>
 
-            {/* Check-in */}
-            <div>
-              <label className="block text-sm mb-2">Check-in</label>
-              <Input type="date" value={checkin} onChange={e => setCheckin(e.target.value)} />
-            </div>
 
-            {/* Check-out */}
-            <div>
-              <label className="block text-sm mb-2">Check-out</label>
-              <Input type="date" value={checkout} onChange={e => setCheckout(e.target.value)} />
-            </div>
 
-            {/* Number of guests */}
-            <div>
-              <label className="block text-sm mb-2">Số khách</label>
-              <Input
-                type="number"
-                min={1}
-                value={numberOfGuest}
-                onChange={e => setNumberOfGuest(parseInt(e.target.value) || 1)}
-              />
-            </div>
-            
-          </div>
-
-          <div className="mt-4">
-            <Button onClick={clearFilters} className="bg-[#14b8a6] hover:bg-[#0d9488] text-white">
-              Xóa bộ lọc
-            </Button>
-          </div>
-        </div>
-
-        {/* Resort Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {resorts.map(resort => (
-            <div
-              key={resort._id}
-              className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group"
-              onClick={() => onNavigate('resort-detail', resort)}
-            >
-              <div className="relative h-64 overflow-hidden">
-                <img
-                  src={resort.images?.[0] || '/placeholder.jpg'}
-                  alt={resort.resortName}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                />
-                <div className="absolute bottom-4 left-4">
-                  <Badge className="bg-white/90 backdrop-blur-sm text-gray-900 hover:bg-white">
-                    <MapPin className="w-3 h-3 mr-1" />
-                    {resort.resortLocation}
-                  </Badge>
-                </div>
-              </div>
-
-              <div className="p-5">
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="text-xl line-clamp-1" style={{ fontFamily: 'var(--font-serif)' }}>
-                    {resort.resortName}
-                  </h3>
-                  <div className="flex items-center gap-1 bg-[#fbbf24] px-2 py-1 rounded-lg">
-                    <Star className="w-4 h-4 fill-current" />
-                    <span className="text-sm">{resort.avgRating || 0}</span>
-                  </div>
-                </div>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">{resort.resortDescription}</p>
-                <div className="flex items-end justify-between pt-4 border-t">
-                  <div>
-                    <p className="text-sm text-gray-500">Từ</p>
-                    <p className="text-2xl text-[#14b8a6]" style={{ fontFamily: 'var(--font-serif)' }}>
-                      ${resort.resortPrice} <span className="text-sm text-gray-500">/ đêm</span>
-                    </p>
-                  </div>
-                  <Button 
-                    className="bg-[#fbbf24] hover:bg-[#f59e0b] text-black"
-                    onClick={(e) => {
-      e.stopPropagation();
-      navigate(`/resort-detail/${resort._id}`);
-    }}
-                  >
-                    Xem chi tiết
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {resorts.length === 0 && (
-          <div className="text-center py-16">
-            <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-              <Search className="w-12 h-12 text-gray-400" />
-            </div>
-            <h3 className="text-2xl mb-2" style={{ fontFamily: 'var(--font-serif)' }}>
-              Không tìm thấy resort
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* Filters - Left Column */}
+        <div className="lg:col-span-1">
+          <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-24">
+            <h3 className="mb-6" style={{ fontFamily: 'var(--font-serif)' }}>
+              Filters
             </h3>
-            <p className="text-gray-600 mb-6">Hãy thử điều chỉnh bộ lọc của bạn</p>
-            <Button onClick={clearFilters} className="bg-[#14b8a6] hover:bg-[#0d9488] text-white">
-              Xóa bộ lọc
-            </Button>
+
+            {/* Price Range */}
+            <div className="mb-6">
+              <Label className="mb-3 block">Price Range</Label>
+              <Slider
+                value={priceRange}
+                onValueChange={setPriceRange}
+                max={500}
+                step={10}
+                className="mb-2"
+              />
+              <div className="flex justify-between text-sm text-gray-600">
+                <span>${priceRange[0]}</span>
+                <span>${priceRange[1]}</span>
+              </div>
+            </div>
+
+            {/* Location */}
+            <div className="mb-6">
+              <Label className="mb-3 block">Location</Label>
+              <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Locations" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Locations</SelectItem>
+                  <SelectItem value="Hoi An">Hoi An</SelectItem>
+                  <SelectItem value="Da Nang">Da Nang</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Property Type */}
+            <div className="mb-6">
+              <Label className="mb-3 block">Property Type</Label>
+              <div className="space-y-3">
+                {['Resort', 'Apartment', 'Room'].map((type) => (
+                  <div key={type} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={type}
+                      checked={selectedType.includes(type)}
+                      onCheckedChange={() => toggleType(type)}
+                    />
+                    <Label htmlFor={type} className="cursor-pointer">
+                      {type}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Amenities */}
+            <div className="mb-6">
+              <Label className="mb-3 block">Amenities</Label>
+              <div className="space-y-3">
+                {['Pool', 'WiFi', 'Kitchen', 'Air Conditioning', 'Parking', 'Beach Access'].map(
+                  (amenity) => (
+                    <div key={amenity} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={amenity}
+                        checked={selectedAmenities.includes(amenity)}
+                        onCheckedChange={() => toggleAmenity(amenity)}
+                      />
+                      <Label htmlFor={amenity} className="cursor-pointer">
+                        {amenity}
+                      </Label>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
           </div>
-        )}
+        </div>
+
+        {/* Property List - Right Column */}
+        <div className="lg:col-span-3">
+          {/* Sort By */}
+          <div className="flex justify-between items-center mb-6">
+            <p className="text-gray-600">
+              {filteredProperties.length} properties found
+            </p>
+            <div className="flex items-center gap-3">
+              <Label>Sort by:</Label>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="popularity">Popularity</SelectItem>
+                  <SelectItem value="price-low">Price: Low to High</SelectItem>
+                  <SelectItem value="price-high">Price: High to Low</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Properties Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filteredProperties.map((property) => (
+              <PropertyCard
+                key={property._id}
+                resort={property}
+                onBook={(property) => onNavigate('details', property)}
+                isWishlisted={true}
+                toggleWishlist={toggleWishlist}
+              />
+            ))}
+          </div>
+
+          {filteredProperties.length === 0 && (
+            <div className="text-center py-20">
+              <p className="text-gray-500 text-lg">
+                No properties found matching your criteria. Try adjusting your filters.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

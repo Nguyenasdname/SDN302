@@ -1,13 +1,15 @@
 import { Star, MapPin, Users, Bed, Bath, Heart } from 'lucide-react';
+import { Property } from '../lib/data';
 import { Card } from './ui/card';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { Button } from './ui/button';
 
-const PropertyCard = ({ resort, onBook, isWishlisted = true, toggleWishlist }) => {
+
+export function PropertyCardProps({ property, onBook, isWishlisted = true, toggleWishlist }) {
     const handleWishlistClick = (e) => {
         e.stopPropagation();
         if (toggleWishlist) {
-            toggleWishlist(resort._id); // dùng _id từ MongoDB
+            toggleWishlist(property.id);
         }
     };
 
@@ -15,15 +17,15 @@ const PropertyCard = ({ resort, onBook, isWishlisted = true, toggleWishlist }) =
         <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group">
             <div
                 className="relative h-64 overflow-hidden"
-                onClick={() => onBook(resort)}
+                onClick={() => onBook(property)}
             >
                 <ImageWithFallback
-                    src={resort.resortIMG || '/placeholder.jpg'} // resort.image giả định hoặc fallback
-                    alt={resort.resortName}
+                    src={property.images[0]}
+                    alt={property.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                 />
                 <div className="absolute top-4 right-4 bg-white px-3 py-1 rounded-full shadow-md">
-                    <span className="text-[#14b8a6]">{resort.type || 'Resort'}</span>
+                    <span className="text-[#14b8a6]">{property.type}</span>
                 </div>
                 {toggleWishlist && (
                     <button
@@ -46,47 +48,47 @@ const PropertyCard = ({ resort, onBook, isWishlisted = true, toggleWishlist }) =
                         <h3
                             className="mb-2 cursor-pointer hover:text-[#14b8a6] transition-colors"
                             style={{ fontFamily: 'var(--font-serif)' }}
-                            onClick={() => onBook(resort)}
+                            onClick={() => onBook(property)}
                         >
-                            {resort.resortName}
+                            {property.name}
                         </h3>
                         <div className="flex items-center gap-2 text-gray-600 mb-2">
                             <MapPin className="w-4 h-4 text-[#14b8a6]" />
-                            <span>{resort.resortLocation}</span>
+                            <span>{property.location}</span>
                         </div>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-1 mb-4">
                     <Star className="w-4 h-4 fill-[#fbbf24] text-[#fbbf24]" />
-                    <span>{resort.avgRating?.toFixed(1) || 0}</span>
-                    <span className="text-gray-500">({resort.reviewCount || 0} reviews)</span>
+                    <span>{property.rating}</span>
+                    <span className="text-gray-500">({property.reviews} reviews)</span>
                 </div>
 
                 <div className="flex items-center gap-4 mb-4 text-gray-600">
                     <div className="flex items-center gap-1">
                         <Users className="w-4 h-4 text-[#14b8a6]" />
-                        <span>{resort.resortCapacity || 2}</span>
+                        <span>{property.guests}</span>
                     </div>
                     <div className="flex items-center gap-1">
                         <Bed className="w-4 h-4 text-[#14b8a6]" />
-                        <span>{resort.bedrooms || 1}</span>
+                        <span>{property.bedrooms}</span>
                     </div>
                     <div className="flex items-center gap-1">
                         <Bath className="w-4 h-4 text-[#14b8a6]" />
-                        <span>{resort.bathrooms || 1}</span>
+                        <span>{property.bathrooms}</span>
                     </div>
                 </div>
 
                 <div className="flex items-center justify-between">
                     <div>
                         <span className="text-2xl" style={{ fontFamily: 'var(--font-serif)' }}>
-                            ${resort.resortPrice || 100}
+                            ${property.price}
                         </span>
                         <span className="text-gray-500"> / night</span>
                     </div>
                     <Button
-                        onClick={() => onBook(resort)}
+                        onClick={() => onBook(property)}
                         style={{
                             backgroundColor: '#fbbf24',
                             color: '#000',
@@ -105,5 +107,3 @@ const PropertyCard = ({ resort, onBook, isWishlisted = true, toggleWishlist }) =
         </Card>
     );
 }
-
-export default PropertyCard

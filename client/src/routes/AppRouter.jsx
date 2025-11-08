@@ -12,7 +12,7 @@ import { useGet } from '../hooks/useGet';
 import ProfilePage from '../pages/ProfilePage/ProfilePage';
 import EditProfilePage from '../pages/EditProfilePage/EditProfilePage';
 import { ResortListPage } from '../pages/ResortPage/ResortListPage';
-import { ResortDetailPage } from '../pages/ResortPage/ResortDetailPage';
+import ResortDetailsPage  from '../pages/ResortPage/ResortDetailsPage';
 // import { ResortFormPage } from '../pages/ResortPage/ResortFormPage';
 
 
@@ -40,8 +40,8 @@ const AppRouter = () => {
                 <Route path='/profile' element={<MainLayout><ProfilePage currentUser={user} /></MainLayout>} />
                 <Route path='/profile/editProfile' element={<MainLayout><EditProfilePage currentUser={user} /></MainLayout>} />
 
-                <Route path='/list' element={<ResortListPage />} />
-                <Route path='/resort-detail/:resortId' element={<ResortDetailPage />} />
+                <Route path='/list' element={<MainLayout><ResortListPage /></MainLayout>} />
+                <Route path='/resort-detail/:resortId' element={<MainLayout><ResortDetailsPage /></MainLayout>} />
                 {/* <Route path='/resort-form' element={<ResortFormPage currentUser={user} />} /> */}
             </Routes>
         </Router>
