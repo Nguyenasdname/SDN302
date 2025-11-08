@@ -10,7 +10,7 @@ const { allowRoles } = require('../../middlewares/roleMiddleware');
 router.get('/', resortController.getAllResorts);
 
 // Lấy chi tiết resort cho tất cả mọi người
-router.get('/:id', resortController.getResortById);
+router.get('/:resortId', resortController.getResortById);
 
 // Tạo mới resort (chỉ employee)
 router.post('/', tokenProvider, allowRoles('employee', 'admin'), upload.array('images'), resortController.createResort);
@@ -20,5 +20,8 @@ router.put('/:id', tokenProvider, allowRoles('employee'), resortController.updat
 
 // Xoá resort (admin và employee)
 router.delete('/:id', tokenProvider, allowRoles('admin', 'employee'), resortController.deleteResort);
+
+router.post('/available', resortController.getAvailableResorts);
+
 
 module.exports = router;

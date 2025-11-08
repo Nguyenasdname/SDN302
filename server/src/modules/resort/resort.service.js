@@ -13,13 +13,20 @@ exports.getAllResorts = async () => {
 };
 
 // Lấy resort theo id
-exports.getResortById = async (id) => {
+
+exports.getResortById = async (resortId) => {
   try {
-    const resort = await Resort.findById(id);
+    const resort = await Resort.findById(resortId).lean();
     if (!resort) return null;
 
-    const images = await ImageResort.find({ resortId: id });
-    return { ...resort.toObject(), images };
+    const images = await ImageResort.find({ resortId })
+      .select("imageUrl -_id")
+      .lean();
+
+    return {
+      ...resort,
+      images: images.map(img => img.imageUrl), 
+    };
   } catch (error) {
     throw error;
   }
@@ -82,23 +89,43 @@ exports.checkAvailable = async (resortId, startDate, endDate) => {
   }
 }
 
-exports.getAvailableResorts = async (startDate, endDate, numberOfGuest) => {
-  const activeStatuses = ["pending", "confirmed", "checkIn", "checkOut"];
+exports.getAvailableResorts = async (startDate, endDate, numberOfGuest = 1, searchQuery = '') => {
   try {
-    const bookedResorts = await Booking.find({
-      bookingStatus: { $in: activeStatuses },
-      $or: [
-        { checkIn: { $lt: endDate }, checkOut: { $gt: startDate } }
-      ],
-    }).distinct("resortId");
+    let bookedResorts = [];
 
-    const availableResorts = await Resort.find({
-      _id: { $nin: bookedResorts },
+    // Nếu có ngày check-in/check-out mới lọc booking
+    if (startDate && endDate) {
+      const activeStatuses = ["pending", "confirmed", "checkIn", "checkOut"];
+      bookedResorts = await Booking.find({
+        bookingStatus: { $in: activeStatuses },
+        $or: [
+          { checkIn: { $lt: endDate }, checkOut: { $gt: startDate } }
+        ],
+      }).distinct("resortId");
+    }
+
+    // Build query filter
+    const query = {
       resortCapacity: { $gte: numberOfGuest },
-    });
+    };
 
+    if (bookedResorts.length > 0) {
+      query._id = { $nin: bookedResorts };
+    }
+
+    if (searchQuery && searchQuery.trim() !== '') {
+  const regex = new RegExp(searchQuery, 'i'); // 'i' = case-insensitive
+  query.$or = [
+    { resortName: regex },
+    { resortDescription: regex }
+  ];
+}
+
+
+    const availableResorts = await Resort.find(query);
     return availableResorts;
   } catch (err) {
-    console.error(err);
+    console.error('Error in getAvailableResorts:', err);
+    return [];
   }
 };
