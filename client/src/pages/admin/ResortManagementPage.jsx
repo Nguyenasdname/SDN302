@@ -50,7 +50,8 @@ const ResortManagementPage = ({ onNavigate }) => {
         status: 'available',
         location: 'Hoi An',
     });
-    const [imagePreview, setImagePreview] = useState(null);
+    const [imagePreviews, setImagePreviews] = useState([]);     
+const [existingImages, setExistingImages] = useState([]);
 
     // Fetch resorts from API on component mount
     useEffect(() => {
@@ -72,6 +73,17 @@ const ResortManagementPage = ({ onNavigate }) => {
             toast.error('Error loading resort: ' + error.message);
         }
     };
+
+    const toggleAmenity = (amenity) => {
+    setFormData(prev => {
+        const amenities = prev.amenities || [];
+        if (amenities.includes(amenity)) {
+            return { ...prev, amenities: amenities.filter(a => a !== amenity) };
+        } else {
+            return { ...prev, amenities: [...amenities, amenity] };
+        }
+    });
+};
 
     // Filter resort by search query
     const filteredResorts = resort.filter(resort =>
@@ -98,7 +110,8 @@ console.log('Filtered resorts:', filteredResorts);
             status: 'available',
             location: 'Hoi An',
         });
-        setImagePreview(null);
+        setImagePreviews([]);
+    setExistingImages([]);
         setShowAddEditDialog(true);
     };
 
@@ -118,35 +131,39 @@ console.log('Filtered resorts:', filteredResorts);
             status: resort.status,
             location: resort.location,
         });
-        setImagePreview(resort.image || null);
+        setExistingImages(Array.isArray(resort.images) ? resort.images : []);
+    setImagePreviews([]);
         setShowAddEditDialog(true);
     };
 
     const handleImageUpload = (e) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            console.log('Image uploaded:', file.name, file.size, file.type);
-            setImagePreview(file);
-            setFormData({ ...formData, image: file });
-        } else {
-            console.log('No file selected');
-        }
-    };
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) {
+        console.log('No file selected');
+        return;
+    }
 
-    const toggleAmenity = (amenity) => {
-        const current = formData.amenities || [];
-        if (current.includes(amenity)) {
-            setFormData({ ...formData, amenities: current.filter(a => a !== amenity) });
-        } else {
-            setFormData({ ...formData, amenities: [...current, amenity] });
+    const newPreviews = files.map(file => {
+        if (!(file instanceof File)) {
+            console.warn('Invalid file object:', file);
+            return null;
         }
-    };
+        return {
+            file,
+            previewUrl: URL.createObjectURL(file) 
+        };
+    }).filter(Boolean); 
+
+    console.log('Images uploaded:', newPreviews.length, 'valid files');
+    setImagePreviews(newPreviews);
+    setFormData(prev => ({ ...prev, images: files }));
+};
 
     // Save new resort or update existing one by calling API
     const handleSave = async () => {
 console.log('Save triggered. Editing:', !!editingResort);
     console.log('Form data before save:', formData);
-    console.log('Image preview:', imagePreview);
+    console.log('Image preview:', imagePreviews);
 
         if (!formData.name || !formData.description || !formData.price) {
             toast.error('Please fill in all required fields');
@@ -167,10 +184,14 @@ console.log('Save triggered. Editing:', !!editingResort);
             formPayload.append('location', formData.location);
             formPayload.append('amenities', JSON.stringify(formData.amenities));
 
-            if (imagePreview && imagePreview instanceof File) {
-                formPayload.append('images', imagePreview); // Multer expects 'images' field as array, adjust accordingly if needed
-                console.log('Appending image to FormData:', imagePreview.name);
-            }
+            if (Array.isArray(imagePreviews) && imagePreviews.length > 0) {
+    imagePreviews.forEach((item, index) => {
+        if (item.file instanceof File) {
+            formPayload.append('images', item.file);
+            console.log(`Appending image ${index + 1}:`, item.file.name);
+        }
+    });
+}
 
             const token = localStorage.getItem('token'); // Assuming you store JWT token here
             console.log('Auth token exists:', !!token);
@@ -357,30 +378,53 @@ console.log('Save triggered. Editing:', !!editingResort);
                                     <input
                                         type="file"
                                         accept="image/*"
+                                        multiple
                                         onChange={handleImageUpload}
                                         className="hidden"
                                         id="image-upload"
                                     />
-                                    <label htmlFor="image-upload" className="cursor-pointer">
-                                        {imagePreview ? (
-                                            <div className="relative">
-                                                <img
-                                                    src={typeof imagePreview === 'string' ? imagePreview : URL.createObjectURL(imagePreview)}
-                                                    alt="Preview"
-                                                    className="max-h-48 mx-auto rounded-lg"
-                                                />
-                                                <div className="absolute top-2 right-2 bg-green-500 rounded-full p-1">
-                                                    <Check className="w-4 h-4 text-white" />
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div>
-                                                <Upload className="w-12 h-12 mx-auto mb-2 text-gray-400" />
-                                                <p className="text-gray-600">Click to upload or drag and drop</p>
-                                                <p className="text-sm text-gray-400 mt-1">PNG, JPG up to 10MB</p>
-                                            </div>
-                                        )}
-                                    </label>
+                                    <label htmlFor="image-upload" className="cursor-pointer block">
+
+            {existingImages.length > 0 && (
+                <div className="mb-4">
+                    <p className="text-xs text-gray-500 mb-2">Current images (will be replaced):</p>
+                    <div className="grid grid-cols-3 gap-2">
+                        {existingImages.map((url, i) => (
+                            <img key={i} src={url} alt="" className="h-24 w-full object-cover rounded" />
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {imagePreviews.length > 0 ? (
+                <div className="grid grid-cols-3 gap-2">
+                    {imagePreviews.map((item, i) => (
+                        <div key={i} className="relative">
+                            <img
+                                src={item.previewUrl}
+                                alt={`Preview ${i + 1}`}
+                                className="h-24 w-full object-cover rounded"
+                            />
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setImagePreviews(prev => prev.filter((_, idx) => idx !== i));
+                                }}
+                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center"
+                            >
+                                ×
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div>
+                    <Upload className="w-12 h-12 mx-auto mb-2 text-gray-400" />
+                    <p className="text-gray-600">Click to upload or drag and drop</p>
+                    <p className="text-sm text-gray-400 mt-1">PNG, JPG up to 10MB (multiple)</p>
+                </div>
+            )}
+        </label>
                                 </div>
                             </div>
 
