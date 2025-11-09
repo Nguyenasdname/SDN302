@@ -15,7 +15,7 @@ exports.getAllResorts = async (req, res) => {
 // Lấy chi tiết resort
 exports.getResortById = async (req, res) => {
   try {
-    const resortId = req.params.resortId; // ← SỬA: dùng :id
+    const resortId = req.params.resortId; 
 
     const resort = await resortService.getResortById(resortId);
     if (!resort) {
@@ -31,8 +31,8 @@ exports.getResortById = async (req, res) => {
 
     // Trả về dữ liệu sạch
     res.status(200).json({
-      ...resort,           // ← object thuần nhờ .lean()
-      images: imageUrls,   // ← mảng URL
+      ...resort,           
+      images: imageUrls,   
     });
   } catch (error) {
     console.error("getResortById error:", error);
@@ -48,22 +48,22 @@ exports.createResort = async (req, res) => {
     console.log('🖼 Files:', req.files);
 
     const {
-      resortName,
-      resortDescription,
-      resortPrice,
-      resortLocation,
-      resortCapacity,
-      resortStatus,
+      name,
+      description,
+      price,
+      location,
+      maxOccupancy,
+      status,
     } = req.body;
 
     // 1️⃣ Tạo resort trước
     const newResort = await resortService.createResort({
-      resortName,
-      resortDescription,
-      resortPrice,
-      resortLocation,
-      resortCapacity,
-      resortStatus,
+      resortName: name,
+      resortDescription: description,
+      resortPrice: price,
+      resortLocation: location,
+      resortCapacity: maxOccupancy,
+      resortStatus: status,
       owner: req.user.id
     });
 
@@ -101,18 +101,69 @@ exports.createResort = async (req, res) => {
 // Cập nhật resort
 exports.updateResort = async (req, res) => {
   try {
-    const resort = await Resort.findById(req.params.id);
+    const resortId = req.params.id;
+
+    // Tìm resort
+    const resort = await Resort.findById(resortId);
     if (!resort) {
       return res.status(404).json({ message: 'Resort not found' });
     }
 
+    // Kiểm tra quyền
     if (req.user.userRole === 'employee' && resort.owner.toString() !== req.user.id) {
       return res.status(403).json({ message: 'No Access' });
     }
 
-    const updatedResort = await resortService.updateResort(req.params.id, req.body);
-    res.status(200).json(updatedResort);
+    console.log('Update Body:', req.body);
+    console.log('Update Files:', req.files);
+
+    // Cập nhật các field text
+    const updates = {
+      resortName: req.body.name,
+      resortDescription: req.body.description,
+      resortPrice: Number(req.body.price),
+      resortHourlyPrice: Number(req.body.hourlyPrice) || 0,
+      resortType: req.body.type,
+      resortCapacity: Number(req.body.maxOccupancy),
+      resortArea: Number(req.body.area),
+      resortBeds: Number(req.body.beds),
+      resortStatus: req.body.status,
+      resortLocation: req.body.location,
+      amenities: req.body.amenities ? JSON.parse(req.body.amenities) : [],
+    };
+
+    // Xử lý ảnh mới (nếu có)
+    if (req.files && req.files.length > 0) {
+      // Xóa ảnh cũ
+      await ImageResort.deleteMany({ resortId });
+
+      // Upload ảnh mới
+      for (let i = 0; i < req.files.length; i++) {
+        const file = req.files[i];
+        const customName = `${resortId}_${i + 1}`;
+        const imageUrl = await uploadImageToCloudinary(file.path, customName, 'resort-image');
+
+        await new ImageResort({
+          resortId,
+          imageUrl
+        }).save();
+      }
+    }
+
+    // Cập nhật resort
+    Object.assign(resort, updates);
+    await resort.save();
+
+    // Lấy lại resort + ảnh
+    const updatedWithImages = await resortService.getResortById(resortId);
+
+    res.status(200).json({
+      message: 'Resort updated successfully!',
+      resort: updatedWithImages
+    });
+
   } catch (error) {
+    console.error('Update error:', error);
     res.status(500).json({ message: error.message });
   }
 };

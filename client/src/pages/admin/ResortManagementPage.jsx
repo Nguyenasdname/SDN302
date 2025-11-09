@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Plus, Search, Edit, Eye, Bed, Users, Maximize, MapPin, X, Upload, Check } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Search, Edit, Eye, Bed, Users, Maximize, MapPin, Upload, Check } from 'lucide-react';
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
@@ -13,8 +13,6 @@ import {
     DialogTitle,
 } from '../../components/ui/dialog';
 import { toast } from 'sonner';
-import { properties as initialProperties } from '../../lib/data';
-
 
 const availableAmenities = [
     'Wi-Fi',
@@ -34,17 +32,8 @@ const availableAmenities = [
     'Room Service',
 ];
 
-
 const ResortManagementPage = ({ onNavigate }) => {
-    const [resorts, setResorts] = useState(
-        initialProperties.map(p => ({
-            ...p,
-            status: 'available',
-            area: 120,
-            beds: 2,
-            amenities: ['Wi-Fi', 'Swimming Pool', 'Air Conditioning'],
-        }))
-    );
+    const [resort, setResorts] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [showAddEditDialog, setShowAddEditDialog] = useState(false);
     const [editingResort, setEditingResort] = useState(null);
@@ -61,16 +50,40 @@ const ResortManagementPage = ({ onNavigate }) => {
         status: 'available',
         location: 'Hoi An',
     });
-    const [imagePreview, setImagePreview] = useState('');
+    const [imagePreview, setImagePreview] = useState(null);
 
-    // Filter resorts
-    const filteredResorts = resorts.filter(resort =>
-        resort.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        resort.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        resort.location.toLowerCase().includes(searchQuery.toLowerCase())
+    // Fetch resorts from API on component mount
+    useEffect(() => {
+        console.log('Component mounted - Fetching resorts...');
+        fetchResorts();
+    }, []);
+
+    const fetchResorts = async () => {
+        try {
+            console.log('Fetching resorts from API...');
+            const res = await fetch('http://localhost:3000/resort');
+            console.log('Response status:', res.status);
+
+            if (!res.ok) throw new Error('Failed to fetch resort');
+            const data = await res.json();
+            console.log('Fetched resorts data:', data);
+            setResorts(data);
+        } catch (error) {
+            toast.error('Error loading resort: ' + error.message);
+        }
+    };
+
+    // Filter resort by search query
+    const filteredResorts = resort.filter(resort =>
+        resort.resortName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        resort.type?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        resort.location?.toLowerCase().includes(searchQuery.toLowerCase())
     );
+    console.log('Search query:', searchQuery);
+console.log('Filtered resorts:', filteredResorts);
 
     const handleOpenAddDialog = () => {
+        console.log('Opening Add Resort Dialog');
         setEditingResort(null);
         setFormData({
             name: '',
@@ -85,26 +98,38 @@ const ResortManagementPage = ({ onNavigate }) => {
             status: 'available',
             location: 'Hoi An',
         });
-        setImagePreview('');
+        setImagePreview(null);
         setShowAddEditDialog(true);
     };
 
     const handleOpenEditDialog = (resort) => {
+        console.log('Opening Edit Dialog for resort:', resort);
         setEditingResort(resort);
-        setFormData(resort);
-        setImagePreview(resort.image);
+        setFormData({
+            name: resort.name,
+            description: resort.description,
+            price: resort.price,
+            hourlyPrice: resort.hourlyPrice || 0,
+            type: resort.type,
+            maxOccupancy: resort.maxOccupancy,
+            area: resort.area,
+            beds: resort.beds,
+            amenities: resort.amenities || [],
+            status: resort.status,
+            location: resort.location,
+        });
+        setImagePreview(resort.image || null);
         setShowAddEditDialog(true);
     };
 
     const handleImageUpload = (e) => {
         const file = e.target.files?.[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result);
-                setFormData({ ...formData, image: reader.result });
-            };
-            reader.readAsDataURL(file);
+            console.log('Image uploaded:', file.name, file.size, file.type);
+            setImagePreview(file);
+            setFormData({ ...formData, image: file });
+        } else {
+            console.log('No file selected');
         }
     };
 
@@ -117,30 +142,74 @@ const ResortManagementPage = ({ onNavigate }) => {
         }
     };
 
-    const handleSave = () => {
+    // Save new resort or update existing one by calling API
+    const handleSave = async () => {
+console.log('Save triggered. Editing:', !!editingResort);
+    console.log('Form data before save:', formData);
+    console.log('Image preview:', imagePreview);
+
         if (!formData.name || !formData.description || !formData.price) {
             toast.error('Please fill in all required fields');
             return;
         }
 
-        if (editingResort) {
-            // Update existing resort
-            setResorts(resorts.map(r =>
-                r.id === editingResort.id ? { ...r, ...formData } : r
-            ));
-            toast.success('Resort updated successfully!');
-        } else {
-            // Add new resort
-            const newResort = {
-                ...formData,
-                id: Math.max(...resorts.map(r => r.id)) + 1,
-                image: imagePreview || 'https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=800',
-            };
-            setResorts([...resorts, newResort]);
-            toast.success('Resort added successfully!');
-        }
+        try {
+            const formPayload = new FormData();
+            formPayload.append('name', formData.name);
+            formPayload.append('description', formData.description);
+            formPayload.append('price', formData.price);
+            formPayload.append('hourlyPrice', formData.hourlyPrice);
+            formPayload.append('type', formData.type);
+            formPayload.append('maxOccupancy', formData.maxOccupancy);
+            formPayload.append('area', formData.area);
+            formPayload.append('beds', formData.beds);
+            formPayload.append('status', formData.status);
+            formPayload.append('location', formData.location);
+            formPayload.append('amenities', JSON.stringify(formData.amenities));
 
-        setShowAddEditDialog(false);
+            if (imagePreview && imagePreview instanceof File) {
+                formPayload.append('images', imagePreview); // Multer expects 'images' field as array, adjust accordingly if needed
+                console.log('Appending image to FormData:', imagePreview.name);
+            }
+
+            const token = localStorage.getItem('token'); // Assuming you store JWT token here
+            console.log('Auth token exists:', !!token);
+
+            let response;
+            if (editingResort) {
+                response = await fetch(`http://localhost:3000/resort/${editingResort._id}`, {
+                    method: 'PUT',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: formPayload,
+                });
+            } else {
+                response = await fetch('http://localhost:3000/resort', {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: formPayload,
+                });
+            }
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('API Error Response:', errorData);
+                throw new Error(errorData.message || 'Failed to save resort');
+            }
+
+            const result = await response.json();
+        console.log('Save success:', result);
+
+            toast.success(editingResort ? 'Resort updated successfully!' : 'Resort added successfully!');
+            setShowAddEditDialog(false);
+            fetchResorts();
+
+        } catch (error) {
+            toast.error(error.message);
+        }
     };
 
     return (
@@ -170,7 +239,7 @@ const ResortManagementPage = ({ onNavigate }) => {
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                         <Input
-                            placeholder="Search resorts by name, type, or location..."
+                            placeholder="Search resort by name, type, or location..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="pl-10"
@@ -181,7 +250,7 @@ const ResortManagementPage = ({ onNavigate }) => {
                 {/* Resort Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredResorts.map((resort) => (
-                        <div key={resort.id} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-shadow">
+                        <div key={resort._id} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-shadow">
                             {/* Image */}
                             <div className="relative h-48 bg-gray-200">
                                 <img
@@ -295,7 +364,11 @@ const ResortManagementPage = ({ onNavigate }) => {
                                     <label htmlFor="image-upload" className="cursor-pointer">
                                         {imagePreview ? (
                                             <div className="relative">
-                                                <img src={imagePreview} alt="Preview" className="max-h-48 mx-auto rounded-lg" />
+                                                <img
+                                                    src={typeof imagePreview === 'string' ? imagePreview : URL.createObjectURL(imagePreview)}
+                                                    alt="Preview"
+                                                    className="max-h-48 mx-auto rounded-lg"
+                                                />
                                                 <div className="absolute top-2 right-2 bg-green-500 rounded-full p-1">
                                                     <Check className="w-4 h-4 text-white" />
                                                 </div>
@@ -445,4 +518,4 @@ const ResortManagementPage = ({ onNavigate }) => {
     );
 }
 
-export default ResortManagementPage
+export default ResortManagementPage;

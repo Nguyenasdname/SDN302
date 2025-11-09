@@ -28,6 +28,7 @@
     "axios": "^1.12.2",
     "class-variance-authority": "^0.7.1",
     "debounce": "^3.0.0",
+    "expo": "^54.0.23",
     "fs": "^0.0.1-security",
     "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.552.0",

@@ -13,7 +13,7 @@ router.get('/:resortId', resortController.getResortById);
 
 router.post('/', tokenProvider, allowRoles('employee', 'admin'), upload.array('images'), resortController.createResort);
 
-router.put('/:id', tokenProvider, allowRoles('employee'), resortController.updateResort);
+router.put('/:id', tokenProvider, allowRoles('employee', 'admin'), upload.array('images'), resortController.updateResort);
 
 router.delete('/:id', tokenProvider, allowRoles('admin', 'employee'), resortController.deleteResort);
 
