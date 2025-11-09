@@ -15,6 +15,7 @@ import { ResortListPage } from '../pages/ResortPage/ResortListPage';
 import ResortDetailsPage from '../pages/ResortPage/ResortDetailsPage';
 import BookingRoomPage from '../pages/BookingRoomPage/BookingRoomPage';
 import PaymentPage from '../pages/PaymentPage/PaymentPage';
+import ContactPage from '../pages/ContactPage/ContactPage';
 // import { ResortFormPage } from '../pages/ResortPage/ResortFormPage';
 
 
@@ -47,6 +48,7 @@ const AppRouter = () => {
                 {/* <Route path='/resort-form' element={<ResortFormPage currentUser={user} />} /> */}
                 <Route path='/booking' element={<MainLayout><BookingRoomPage currentUser={user} /></MainLayout>} />
                 <Route path='/payment' element={<MainLayout><PaymentPage /></MainLayout>} />
+                <Route path='/contact' element={<MainLayout><ContactPage currentUser={user} /></MainLayout>} />
             </Routes>
         </Router>
     )

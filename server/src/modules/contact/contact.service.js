@@ -1,60 +1,75 @@
 const Contact = require('./contact.model')
+const EmailService = require('../email/email.service')
+const emailTemplate = require('../email/email.templates')
 
-// Tạo contact mới
-exports.createContact = async (data) => {
+exports.CreateContact = async (userId, contactData) => {
     try {
-        const newContact = new Contact (data);
-        return await newContact.save();
-    } catch (error) {
-        throw error;
+
+        const newContact = new Contact({
+            userId,
+            ...contactData
+        })
+        return await newContact.save()
+    } catch (err) {
+        console.error(err)
     }
 }
 
-// Lấy contact cho admin
-exports.getAllContacts = async () => {
+exports.GetAllContact = async () => {
     try {
         return await Contact.find()
-        .populate('userId', 'userName userEmail')
-        .sort({ createDate: -1 })
-    } catch (error) {
-        throw error
-    }
-} 
-
-// Lấy contact theo Id
-exports.getContactById = async (id) => {
-    try {
-        return await Contact.findById(id)
-        .populate('userId', 'userName userEmail')
-    } catch (error) {
-        throw error
+    } catch (err) {
+        console.error(err)
     }
 }
 
-// Cập nhật contact
-exports.updateContact = async (id, data) => {
+exports.GetInquiriesContact = async () => {
     try {
-        return await Contact.findByIdAndUpdate(id, data, { new: true })
-    } catch (error) {
-        throw error
+        return await Contact.find({
+            contactStatus: { $in: ['Seen', 'Replied', 'New'] }
+        }).populate({
+            path: 'userId',
+            select: '-userPass'
+        })
+    } catch (err) {
+        console.error(err)
     }
 }
 
-// Xóa contact
-exports.deleteContact = async (id) => {
+exports.GetRefundContact = async () => {
     try {
-        return await Contact.findByIdAndDelete(id)
-    } catch (error) {
-        throw error
+        return await Contact.find({
+            contactStatus: { $in: ['Pending-Refund', 'Refunded'] }
+        }).populate({
+            path: 'userId',
+            select: '-userPass'
+        })
+    } catch (err) {
+        console.error(err)
     }
 }
 
-// User xem lại contact của mình 
-exports.getContactsByUser = async (userId) => {
+exports.SetSeenContact = async (contactId) => {
     try {
-        return await Contact.find({ userId })
-        .sort({ createDate: -1 })
-    } catch (error) {
-        throw error
+        const contact = await Contact.findById(contactId)
+        contact.contactStatus = 'Seen'
+        return await contact.save()
+    } catch (err) {
+        console.error(err)
+    }
+}
+
+exports.ReplyContact = async (contactId, replyMessage) => {
+    try {
+        const contact = await Contact.findById(contactId).populate('userId')
+        contact.contactStatus = 'Replied'
+        await EmailService.sendMail(
+            contact.userId.userEmail,
+            'Reply Contact',
+            emailTemplate.replyContact(replyMessage, contact)
+        )
+        return await contact.save()
+    } catch (err) {
+        console.error(err)
     }
 }

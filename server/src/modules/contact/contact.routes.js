@@ -1,25 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const contactController = require('./contact.controller')
+const ContactController = require('./contact.controller')
 const { tokenProvider } = require('../../middlewares/authMiddleware')
 const { allowRoles } = require('../../middlewares/roleMiddleware')
 
-// Tạo contact
-router.post('/', tokenProvider, allowRoles('user', 'employee', 'admin'), contactController.createContact);
-
-// Admin xem all contact
-router.get('/', tokenProvider, allowRoles('admin'), contactController.getAllContacts);
-
-// Admin xem contact theo id
-router.get('/:id', tokenProvider, allowRoles('admin'), contactController.getContactById);
-
-// Admin update contact
-router.put('/:id', tokenProvider, allowRoles('admin'), contactController.updateContact);
-
-// Admin xóa contact
-router.delete('/:id', tokenProvider, allowRoles('admin'), contactController.deleteContact);
-
-// User xem lại contact mình
-router.get('/myContact', tokenProvider, allowRoles('user', 'employee', 'admin'), contactController.getContactsByUser);
+router.post('/', tokenProvider, ContactController.CreateContact)
+router.get('/', ContactController.GetAllContact)
+router.get('/inquiries', ContactController.GetInquiriesContact)
+router.get('/refund', ContactController.GetRefundContact)
+router.patch('/:contactId/seen', tokenProvider, ContactController.SetSeenContact)
+router.patch('/:contactId/replied', tokenProvider, ContactController.ReplyContact)
 
 module.exports = router;

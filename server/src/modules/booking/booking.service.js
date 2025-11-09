@@ -1,4 +1,6 @@
 const Booking = require('./boooking.model')
+const Payment = require('../payment/payment.model')
+const Contact = require('../contact/contact.model')
 
 exports.getListBooking = async () => {
     try {
@@ -96,6 +98,24 @@ exports.checkOutBooking = async (bookingId) => {
     try {
         const booking = await Booking.findById(bookingId)
         booking.bookingStatus = 'CheckOut'
+        return await booking.save()
+    } catch (err) {
+        console.error(err)
+    }
+}
+
+exports.cancelBooking = async (bookingId, cancelReason, userId) => {
+    try {
+        const booking = await Booking.findById(bookingId)
+        booking.bookingStatus = 'Cancelled'
+        const newContact = new Contact({
+            userId,
+            contactTitle: 'Cancel Booking',
+            contactContent: cancelReason,
+            contactStatus: 'Refunded',
+            refundAmount: 0
+        })
+        await newContact.save()
         return await booking.save()
     } catch (err) {
         console.error(err)

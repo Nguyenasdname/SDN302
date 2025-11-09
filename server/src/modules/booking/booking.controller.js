@@ -134,3 +134,15 @@ exports.checkOutBooking = async (req, res) => {
         console.error(err)
     }
 }
+
+exports.cancelBooking = async (req, res) => {
+    const userId = req.user.id
+    const { bookingId } = req.params
+    const { cancelReason } = req.body
+    try {
+        const booking = await bookingService.cancelBooking(bookingId, cancelReason, userId)
+        res.json(booking)
+    } catch (err) {
+        console.error(err)
+    }
+}
