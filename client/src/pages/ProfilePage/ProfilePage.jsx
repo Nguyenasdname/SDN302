@@ -30,6 +30,7 @@ import { Textarea } from '../../components/ui/textarea';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useGet } from '../../hooks/useGet';
+import BookingHistoryCard from '../../components/BookingHistoryCard';
 
 
 const ProfilePage = ({ onNavigate, wishlist, toggleWishlist, currentUser }) => {
@@ -40,17 +41,39 @@ const ProfilePage = ({ onNavigate, wishlist, toggleWishlist, currentUser }) => {
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [cancellationReason, setCancellationReason] = useState('');
+    const [bookingService, setBookingService] = useState([])
     const navigate = useNavigate()
+
+    const { data: userListBooking, loading: bookingLoading } = useGet('/booking/user')
+
+
+    const endpoint = selectedBooking?._id ? `/bookingService/${selectedBooking._id}` : null;
+    const { data: bookingServiceData, refetch: refetchBookingService } = useGet(endpoint)
 
     useEffect(() => {
         const savedBookings = JSON.parse(localStorage.getItem('mybooking-bookings') || '[]');
         setUserBookings(savedBookings);
     }, []);
 
+    useEffect(() => {
+        refetchBookingService()
+        if (bookingServiceData) {
+            setBookingService(bookingServiceData)
+        }
+    }, [selectedBooking])
+
+    if (bookingLoading) {
+        return (
+            <div>Loading...</div>
+        )
+    }
+
+    const upcomingStatus = ['Pending', 'Confirmed', 'CheckIn', 'CheckOut']
+    const pastStatus = ['Completed', 'Cancelled']
     // Combine saved bookings with mock bookings
-    const allBookings = [...userBookings, ...mockBookings];
-    const upcomingBookings = allBookings.filter((b) => b.status === 'upcoming');
-    const pastBookings = allBookings.filter((b) => b.status === 'past');
+    const allBookings = [...userListBooking];
+    const upcomingBookings = allBookings.filter((b) => upcomingStatus.includes(b.bookingStatus));
+    const pastBookings = allBookings.filter((b) => pastStatus.includes(b.bookingStatus));
     // const wishlistProperties = properties.filter((p) => wishlist.includes(p.id));
 
     const handleCancelBooking = () => {
@@ -159,70 +182,12 @@ const ProfilePage = ({ onNavigate, wishlist, toggleWishlist, currentUser }) => {
                                 <TabsContent value="upcoming">
                                     <div className="space-y-6">
                                         {upcomingBookings.map((booking) => (
-                                            <Card key={booking.id} className="p-6">
-                                                <div className="flex gap-6">
-                                                    <div className="w-48 h-32 rounded-lg overflow-hidden flex-shrink-0">
-                                                        <ImageWithFallback
-                                                            src={booking.propertyImage}
-                                                            alt={booking.propertyName}
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                    </div>
-
-                                                    <div className="flex-1">
-                                                        <h3 className="mb-3" style={{ fontFamily: 'var(--font-serif)' }}>
-                                                            {booking.propertyName}
-                                                        </h3>
-
-                                                        <div className="space-y-2 text-gray-600 mb-4">
-                                                            <div className="flex items-center gap-2">
-                                                                <Calendar className="w-4 h-4 text-[#14b8a6]" />
-                                                                <span>
-                                                                    {new Date(booking.checkIn).toLocaleDateString()} -{' '}
-                                                                    {new Date(booking.checkOut).toLocaleDateString()}
-                                                                </span>
-                                                            </div>
-                                                            <div className="flex items-center gap-2">
-                                                                <Users className="w-4 h-4 text-[#14b8a6]" />
-                                                                <span>{booking.guests} guests</span>
-                                                            </div>
-                                                        </div>
-
-                                                        <div className="flex items-center justify-between">
-                                                            <div>
-                                                                <span className="text-gray-500">Total: </span>
-                                                                <span className="text-xl" style={{ fontFamily: 'var(--font-serif)' }}>
-                                                                    ${booking.totalPrice}
-                                                                </span>
-                                                            </div>
-
-                                                            <div className="flex gap-3">
-                                                                <Button
-                                                                    variant="outline"
-                                                                    onClick={() => {
-                                                                        setSelectedBooking(booking);
-                                                                        setShowDetailsModal(true);
-                                                                    }}
-                                                                >
-                                                                    <Eye className="w-4 h-4 mr-2" />
-                                                                    View Details
-                                                                </Button>
-                                                                <Button
-                                                                    variant="outline"
-                                                                    className="text-red-600 border-red-600 hover:bg-red-50"
-                                                                    onClick={() => {
-                                                                        setSelectedBooking(booking);
-                                                                        setShowCancelModal(true);
-                                                                    }}
-                                                                >
-                                                                    <XCircle className="w-4 h-4 mr-2" />
-                                                                    Cancel
-                                                                </Button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </Card>
+                                            <BookingHistoryCard
+                                                booking={booking}
+                                                setSelectedBooking={setSelectedBooking}
+                                                setShowCancelModal={setShowCancelModal}
+                                                setShowDetailsModal={setShowDetailsModal}
+                                            />
                                         ))}
 
                                         {upcomingBookings.length === 0 && (
@@ -252,48 +217,12 @@ const ProfilePage = ({ onNavigate, wishlist, toggleWishlist, currentUser }) => {
                                 <TabsContent value="past">
                                     <div className="space-y-6">
                                         {pastBookings.map((booking) => (
-                                            <Card key={booking.id} className="p-6 opacity-75">
-                                                <div className="flex gap-6">
-                                                    <div className="w-48 h-32 rounded-lg overflow-hidden flex-shrink-0">
-                                                        <ImageWithFallback
-                                                            src={booking.propertyImage}
-                                                            alt={booking.propertyName}
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                    </div>
-
-                                                    <div className="flex-1">
-                                                        <h3 className="mb-3" style={{ fontFamily: 'var(--font-serif)' }}>
-                                                            {booking.propertyName}
-                                                        </h3>
-
-                                                        <div className="space-y-2 text-gray-600 mb-4">
-                                                            <div className="flex items-center gap-2">
-                                                                <Calendar className="w-4 h-4 text-[#14b8a6]" />
-                                                                <span>
-                                                                    {new Date(booking.checkIn).toLocaleDateString()} -{' '}
-                                                                    {new Date(booking.checkOut).toLocaleDateString()}
-                                                                </span>
-                                                            </div>
-                                                            <div className="flex items-center gap-2">
-                                                                <Users className="w-4 h-4 text-[#14b8a6]" />
-                                                                <span>{booking.guests} guests</span>
-                                                            </div>
-                                                        </div>
-
-                                                        <div className="flex items-center justify-between">
-                                                            <div>
-                                                                <span className="text-gray-500">Total: </span>
-                                                                <span className="text-xl" style={{ fontFamily: 'var(--font-serif)' }}>
-                                                                    ${booking.totalPrice}
-                                                                </span>
-                                                            </div>
-
-                                                            <Button variant="outline">Leave Review</Button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </Card>
+                                            <BookingHistoryCard
+                                                booking={booking}
+                                                setSelectedBooking={setSelectedBooking}
+                                                setShowCancelModal={setShowCancelModal}
+                                                setShowDetailsModal={setShowDetailsModal}
+                                            />
                                         ))}
                                     </div>
                                 </TabsContent>
@@ -444,21 +373,21 @@ const ProfilePage = ({ onNavigate, wishlist, toggleWishlist, currentUser }) => {
                             <div className="flex gap-4">
                                 <div className="w-32 h-32 rounded-lg overflow-hidden flex-shrink-0">
                                     <ImageWithFallback
-                                        src={selectedBooking.propertyImage}
-                                        alt={selectedBooking.propertyName}
+                                        src={selectedBooking.resortId.resortIMG}
+                                        alt={selectedBooking.resortId.resortName}
                                         className="w-full h-full object-cover"
                                     />
                                 </div>
                                 <div className="flex-1">
                                     <h3 className="text-xl mb-2" style={{ fontFamily: 'var(--font-serif)' }}>
-                                        {selectedBooking.propertyName}
+                                        {selectedBooking.resortId.resortName}
                                     </h3>
                                     <p className="text-sm text-gray-600">
-                                        Booking ID: <span className="text-[#14b8a6]">{selectedBooking.id}</span>
+                                        Booking ID: <span className="text-[#14b8a6]">{selectedBooking._id}</span>
                                     </p>
-                                    {selectedBooking.bookingDate && (
+                                    {selectedBooking.createDate && (
                                         <p className="text-sm text-gray-600">
-                                            Booked on: {new Date(selectedBooking.bookingDate).toLocaleDateString('en-GB')}
+                                            Booked on: {new Date(selectedBooking.createDate).toLocaleDateString('en-GB')}
                                         </p>
                                     )}
                                 </div>
@@ -480,7 +409,7 @@ const ProfilePage = ({ onNavigate, wishlist, toggleWishlist, currentUser }) => {
                                     </div>
                                     <div>
                                         <Label className="text-gray-600">Guests</Label>
-                                        <p className="mt-1">{selectedBooking.guests} people</p>
+                                        <p className="mt-1">{selectedBooking.numberOfGuests} people</p>
                                     </div>
                                     {selectedBooking.nights && (
                                         <div>
@@ -515,17 +444,17 @@ const ProfilePage = ({ onNavigate, wishlist, toggleWishlist, currentUser }) => {
                             )}
 
                             {/* Services */}
-                            {selectedBooking.selectedServices && selectedBooking.selectedServices.length > 0 && (
+                            {bookingService && bookingService.length > 0 && (
                                 <div>
                                     <h3 className="text-lg mb-3" style={{ fontFamily: 'var(--font-serif)' }}>
                                         Additional Services
                                     </h3>
                                     <div className="bg-gray-50 p-4 rounded-lg">
                                         <ul className="space-y-2">
-                                            {selectedBooking.selectedServices.map((service, index) => (
+                                            {bookingService.map((service, index) => (
                                                 <li key={index} className="flex justify-between">
-                                                    <span>{service.name} (×{service.quantity})</span>
-                                                    <span>${(service.price * service.quantity).toFixed(2)}</span>
+                                                    <span>{service.serviceId.serviceName} (×{service.quantity})</span>
+                                                    <span>${(service.totalPrice).toFixed(2)}</span>
                                                 </li>
                                             ))}
                                         </ul>
@@ -542,7 +471,7 @@ const ProfilePage = ({ onNavigate, wishlist, toggleWishlist, currentUser }) => {
                                     <div className="flex justify-between">
                                         <span>Total Amount</span>
                                         <span className="text-xl text-[#14b8a6]" style={{ fontFamily: 'var(--font-serif)' }}>
-                                            ${selectedBooking.totalPrice.toFixed(2)}
+                                            ${selectedBooking.bookingTotal.toFixed(2)}
                                         </span>
                                     </div>
                                     {selectedBooking.depositPaid && (

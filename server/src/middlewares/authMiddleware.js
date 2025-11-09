@@ -9,8 +9,6 @@ exports.tokenProvider = (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, secret)
-        console.log(">>> decoded token:", decoded)
-
         req.user = decoded  
         next()
     } catch (err) {

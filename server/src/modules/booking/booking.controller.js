@@ -19,10 +19,7 @@ exports.getListBookingByUserId = async (req, res) => {
         const userId = req.user.id
         const listBooking = await bookingService.getListBookingByUserId(userId)
         if (!listBooking) return res.status(404).json({ message: `Not Found` })
-        res.json({
-            message: `Get List Booking By User Id Success!`,
-            listBooking
-        })
+        res.json(listBooking)
     } catch (err) {
         console.error(err)
     }
@@ -96,6 +93,19 @@ exports.confirmBooking = async (req, res) => {
         res.json({
             message: 'Successful',
             booking: confirmBooking
+        })
+    } catch (err) {
+        console.error(err)
+    }
+}
+
+exports.completedBooking = async (req, res) => {
+    const { bookingId } = req.params
+    try {
+        const completedBooking = await bookingService.completedBooking(bookingId)
+        res.json({
+            message: `Successful`,
+            booking: completedBooking
         })
     } catch (err) {
         console.error(err)

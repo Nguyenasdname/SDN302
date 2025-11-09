@@ -80,13 +80,13 @@ const Header = ({ currentPage }) => {
               Resorts & Rooms
             </button>
             <button
-              onClick={() => navigate("/home")}
+              onClick={() => navigate("/")}
               className="text-gray-600 hover:text-[#14b8a6] transition-colors"
             >
               Destinations
             </button>
             <button
-              onClick={() => navigate("/home")}
+              onClick={() => navigate("/")}
               className="text-gray-600 hover:text-[#14b8a6] transition-colors"
             >
               About Us

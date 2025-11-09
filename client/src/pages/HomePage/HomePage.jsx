@@ -5,10 +5,12 @@ import { properties } from '../../lib/data';
 // import { Property } from '../../lib/data';
 import { ImageWithFallback } from '../../components/ImageWithFallBack'
 import { useGet } from '../../hooks/useGet';
+import { useNavigate } from 'react-router-dom';
 
 
 const HomePage = ({ onNavigate, wishlist, toggleWishlist }) => {
     const { data: resorts, loading: resortLoading } = useGet('/resort')
+    const navigate = useNavigate()
     if (resortLoading) {
         return (
             <div>Loading...</div>
@@ -48,7 +50,7 @@ const HomePage = ({ onNavigate, wishlist, toggleWishlist }) => {
 
                 {/* Search Bar */}
                 <div className="absolute bottom-20 left-0 right-0 px-6">
-                    <SearchBar onSearch={() => onNavigate('list')} />
+                    <SearchBar onSearch={() => navigate('/list')} />
                 </div>
             </section>
 
