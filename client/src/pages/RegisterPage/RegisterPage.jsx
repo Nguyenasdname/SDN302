@@ -205,7 +205,7 @@ const RegisterPage = () => {
                                     console.log(`res is: ${res}`)
                                     if (res.token) {
                                         localStorage.setItem('token', res.token)
-                                        alert(`Oke cu ${res.user + res.token}`)
+                                        navigate('/')
                                     } else {
                                         alert(`No Token`)
                                     }

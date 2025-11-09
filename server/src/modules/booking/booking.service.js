@@ -81,3 +81,23 @@ exports.completedBooking = async (bookingId) => {
         console.error(err)
     }
 }
+
+exports.checkInBooking = async (bookingId) => {
+    try {
+        const booking = await Booking.findById(bookingId)
+        booking.bookingStatus = 'CheckIn'
+        return await booking.save()
+    } catch (err) {
+        console.error(err)
+    }
+}
+
+exports.checkOutBooking = async (bookingId) => {
+    try {
+        const booking = await Booking.findById(bookingId)
+        booking.bookingStatus = 'CheckOut'
+        return await booking.save()
+    } catch (err) {
+        console.error(err)
+    }
+}

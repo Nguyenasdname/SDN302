@@ -47,161 +47,8 @@ import {
 import { Label } from '../../components/ui/label';
 import { Textarea } from '../../components/ui/textarea';
 import { toast } from 'sonner';
-
-// Mock booking data
-const mockBookings = [
-    {
-        id: 'BK001',
-        resortName: 'Oceanview Villa Paradise',
-        customerName: 'Nguyen Van A',
-        customerEmail: 'nguyen.a@email.com',
-        customerPhone: '+84 901 234 567',
-        checkInDate: '2025-11-10',
-        checkOutDate: '2025-11-15',
-        totalAmount: 1750,
-        status: 'confirmed',
-        bookingDate: '2025-10-20',
-        guests: 4,
-        services: ['Spa Package', 'Airport Transfer'],
-        paymentHistory: [
-            { date: '2025-10-20', amount: 525, type: 'Deposit (30%)', status: 'Paid' },
-            { date: '2025-11-09', amount: 1225, type: 'Final Payment', status: 'Pending' }
-        ],
-        specialRequests: 'Late check-in requested'
-    },
-    {
-        id: 'BK002',
-        resortName: 'Ancient Town Retreat',
-        customerName: 'Tran Thi B',
-        customerEmail: 'tran.b@email.com',
-        customerPhone: '+84 902 345 678',
-        checkInDate: '2025-11-05',
-        checkOutDate: '2025-11-08',
-        totalAmount: 900,
-        status: 'pending_deposit',
-        bookingDate: '2025-11-01',
-        guests: 2,
-        services: ['Breakfast Included'],
-        paymentHistory: [
-            { date: '2025-11-01', amount: 270, type: 'Deposit (30%)', status: 'Pending' }
-        ],
-        specialRequests: ''
-    },
-    {
-        id: 'BK003',
-        resortName: 'Marble Mountain Lodge',
-        customerName: 'Le Van C',
-        customerEmail: 'le.c@email.com',
-        customerPhone: '+84 903 456 789',
-        checkInDate: '2025-11-05',
-        checkOutDate: '2025-11-06',
-        totalAmount: 250,
-        status: 'checked_in',
-        bookingDate: '2025-10-15',
-        guests: 3,
-        services: ['Dinner', 'City Tour'],
-        paymentHistory: [
-            { date: '2025-10-15', amount: 75, type: 'Deposit (30%)', status: 'Paid' },
-            { date: '2025-11-05', amount: 175, type: 'Final Payment', status: 'Paid' }
-        ],
-        specialRequests: 'Non-smoking room'
-    },
-    {
-        id: 'BK004',
-        resortName: 'Riverside Boutique Resort',
-        customerName: 'Pham Thi D',
-        customerEmail: 'pham.d@email.com',
-        customerPhone: '+84 904 567 890',
-        checkInDate: '2025-10-28',
-        checkOutDate: '2025-11-02',
-        totalAmount: 1500,
-        status: 'checked_out',
-        bookingDate: '2025-09-15',
-        guests: 6,
-        services: ['All Meals', 'Spa Package', 'Beach Activities'],
-        paymentHistory: [
-            { date: '2025-09-15', amount: 450, type: 'Deposit (30%)', status: 'Paid' },
-            { date: '2025-10-27', amount: 1050, type: 'Final Payment', status: 'Paid' }
-        ],
-        specialRequests: 'Anniversary celebration - requested room decoration'
-    },
-    {
-        id: 'BK005',
-        resortName: 'Sunset Beach Resort',
-        customerName: 'Hoang Van E',
-        customerEmail: 'hoang.e@email.com',
-        customerPhone: '+84 905 678 901',
-        checkInDate: '2025-10-25',
-        checkOutDate: '2025-10-27',
-        totalAmount: 600,
-        status: 'cancelled' ,
-        bookingDate: '2025-10-10',
-        guests: 2,
-        services: [],
-        paymentHistory: [
-            { date: '2025-10-10', amount: 180, type: 'Deposit (30%)', status: 'Refunded' }
-        ],
-        specialRequests: '',
-        cancellationReason: 'Change of travel plans',
-        cancellationDate: '2025-10-20'
-    },
-    {
-        id: 'BK006',
-        resortName: 'Dragon Bridge View',
-        customerName: 'Vo Thi F',
-        customerEmail: 'vo.f@email.com',
-        customerPhone: '+84 906 789 012',
-        checkInDate: '2025-11-07',
-        checkOutDate: '2025-11-12',
-        totalAmount: 2250,
-        status: 'confirmed' ,
-        bookingDate: '2025-10-18',
-        guests: 8,
-        services: ['Full Board', 'Private Pool', 'Butler Service'],
-        paymentHistory: [
-            { date: '2025-10-18', amount: 675, type: 'Deposit (30%)', status: 'Paid' },
-            { date: '2025-11-06', amount: 1575, type: 'Final Payment', status: 'Pending' }
-        ],
-        specialRequests: 'Family reunion - need connecting rooms'
-    },
-    {
-        id: 'BK007',
-        resortName: 'Lantern Town Heritage',
-        customerName: 'Bui Van G',
-        customerEmail: 'bui.g@email.com',
-        customerPhone: '+84 907 890 123',
-        checkInDate: '2025-11-05',
-        checkOutDate: '2025-11-05',
-        totalAmount: 180,
-        status: 'checked_out' ,
-        bookingDate: '2025-11-04',
-        guests: 2,
-        services: ['Breakfast'],
-        paymentHistory: [
-            { date: '2025-11-05', amount: 180, type: 'Full Payment', status: 'Paid' }
-        ],
-        specialRequests: 'Day-use booking only'
-    },
-    {
-        id: 'BK008',
-        resortName: 'Palm Garden Estate',
-        customerName: 'Dao Thi H',
-        customerEmail: 'dao.h@email.com',
-        customerPhone: '+84 908 901 234',
-        checkInDate: '2025-11-12',
-        checkOutDate: '2025-11-20',
-        totalAmount: 3200,
-        status: 'confirmed' ,
-        bookingDate: '2025-10-01',
-        guests: 10,
-        services: ['Wedding Package', 'Photography', 'Catering', 'Decoration'],
-        paymentHistory: [
-            { date: '2025-10-01', amount: 960, type: 'Deposit (30%)', status: 'Paid' },
-            { date: '2025-11-11', amount: 2240, type: 'Final Payment', status: 'Pending' }
-        ],
-        specialRequests: 'Beach wedding ceremony - needs event coordinator'
-    }
-];
+import { useGet } from '../../hooks/useGet'
+import BookingTableManagement from '../../components/BookingTableManagement';
 
 
 const BookingManagementPage = ({ onNavigate }) => {
@@ -216,17 +63,28 @@ const BookingManagementPage = ({ onNavigate }) => {
     const [cancellationReason, setCancellationReason] = useState('');
     const itemsPerPage = 10;
 
-    // Filter bookings
-    const filteredBookings = mockBookings.filter(booking => {
+    const {
+        data: bookingList,
+        loading: bookingLoading,
+        refetch: refetchBooking
+    } = useGet(`/booking`)
+
+    if (bookingLoading) {
+        return (
+            <div>Loading...</div>
+        )
+    }
+
+    const filteredBookings = bookingList.filter(booking => {
         const matchesSearch =
-            booking.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            booking.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            booking.resortName.toLowerCase().includes(searchTerm.toLowerCase());
+            booking._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            booking.userId.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            booking.resortId.resortName.toLowerCase().includes(searchTerm.toLowerCase());
 
-        const matchesStatus = statusFilter === 'all' || booking.status === statusFilter;
+        const matchesStatus = statusFilter === 'all' || booking.bookingStatus === statusFilter;
 
-        const matchesCheckIn = !checkInDateFilter || booking.checkInDate === checkInDateFilter;
-        const matchesCheckOut = !checkOutDateFilter || booking.checkOutDate === checkOutDateFilter;
+        const matchesCheckIn = !checkInDateFilter || booking.checkIn === checkInDateFilter;
+        const matchesCheckOut = !checkOutDateFilter || booking.checkOut === checkOutDateFilter;
 
         return matchesSearch && matchesStatus && matchesCheckIn && matchesCheckOut;
     });
@@ -238,11 +96,12 @@ const BookingManagementPage = ({ onNavigate }) => {
 
     const getStatusBadge = (status) => {
         const statusConfig = {
-            pending_deposit: { label: 'Pending Deposit', className: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
-            confirmed: { label: 'Confirmed', className: 'bg-green-100 text-green-800 border-green-200' },
-            checked_in: { label: 'Checked-In', className: 'bg-blue-100 text-blue-800 border-blue-200' },
-            checked_out: { label: 'Checked-Out', className: 'bg-gray-100 text-gray-800 border-gray-200' },
-            cancelled: { label: 'Cancelled', className: 'bg-red-100 text-red-800 border-red-200' }
+            Pending: { label: 'Pending Deposit', className: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
+            Confirmed: { label: 'Confirmed', className: 'bg-green-100 text-green-800 border-green-200' },
+            CheckIn: { label: 'Checked-In', className: 'bg-blue-100 text-blue-800 border-blue-200' },
+            CheckOut: { label: 'Checked-Out', className: 'bg-gray-100 text-gray-800 border-gray-200' },
+            Cancelled: { label: 'Cancelled', className: 'bg-red-100 text-red-800 border-red-200' },
+            Completed: { label: 'Completed', className: 'bg-purple-100 text-purple-800 border-purple-200' }
         };
 
         const config = statusConfig[status];
@@ -253,24 +112,9 @@ const BookingManagementPage = ({ onNavigate }) => {
         );
     };
 
-    const canCheckIn = (booking) => {
-        const today = new Date().toISOString().split('T')[0];
-        return booking.status === 'confirmed' && booking.checkInDate === today;
-    };
-
-    const canCheckOut = (booking) => {
-        const today = new Date().toISOString().split('T')[0];
-        return booking.status === 'checked_in' && booking.checkOutDate >= today;
-    };
-
-    const handleCheckIn = (booking) => {
-        toast.success(`Guest ${booking.customerName} has been checked in successfully!`);
-        // Update booking status in real implementation
-    };
-
-    const handleCheckOut = (booking) => {
-        toast.success(`Guest ${booking.customerName} has been checked out successfully!`);
-        // Update booking status in real implementation
+    const handleExportBookings = () => {
+        toast.success('Booking data exported successfully');
+        // Implement export functionality
     };
 
     const handleCancelBooking = () => {
@@ -282,18 +126,8 @@ const BookingManagementPage = ({ onNavigate }) => {
         setShowCancelModal(false);
         setCancellationReason('');
         setSelectedBooking(null);
-        // Update booking status in real implementation
-    };
 
-    const handleResendConfirmation = (booking) => {
-        toast.success(`Confirmation email sent to ${booking.customerEmail}`);
     };
-
-    const handleExportBookings = () => {
-        toast.success('Booking data exported successfully');
-        // Implement export functionality
-    };
-
     const clearFilters = () => {
         setSearchTerm('');
         setStatusFilter('all');
@@ -417,147 +251,24 @@ const BookingManagementPage = ({ onNavigate }) => {
             </div>
 
             {/* Bookings Table */}
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                <div className="overflow-x-auto">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Booking ID</TableHead>
-                                <TableHead>Resort Name</TableHead>
-                                <TableHead>Customer Name</TableHead>
-                                <TableHead>Check-in</TableHead>
-                                <TableHead>Check-out</TableHead>
-                                <TableHead>Total Amount</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {paginatedBookings.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                                        No bookings found matching your filters
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                paginatedBookings.map((booking) => (
-                                    <TableRow key={booking.id}>
-                                        <TableCell>
-                                            <span className="text-[#14b8a6]">{booking.id}</span>
-                                        </TableCell>
-                                        <TableCell>{booking.resortName}</TableCell>
-                                        <TableCell>{booking.customerName}</TableCell>
-                                        <TableCell>{new Date(booking.checkInDate).toLocaleDateString('en-GB')}</TableCell>
-                                        <TableCell>{new Date(booking.checkOutDate).toLocaleDateString('en-GB')}</TableCell>
-                                        <TableCell>${booking.totalAmount.toLocaleString()}</TableCell>
-                                        <TableCell>{getStatusBadge(booking.status)}</TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                {/* View Details */}
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        setSelectedBooking(booking);
-                                                        setShowDetailsModal(true);
-                                                    }}
-                                                >
-                                                    <Eye className="w-4 h-4" />
-                                                </Button>
-
-                                                {/* Check-in Button */}
-                                                {canCheckIn(booking) && (
-                                                    <Button
-                                                        size="sm"
-                                                        onClick={() => handleCheckIn(booking)}
-                                                        className="bg-blue-600 hover:bg-blue-700 text-white"
-                                                    >
-                                                        <LogIn className="w-4 h-4 mr-1" />
-                                                        Check-In
-                                                    </Button>
-                                                )}
-
-                                                {/* Check-out Button */}
-                                                {canCheckOut(booking) && (
-                                                    <Button
-                                                        size="sm"
-                                                        onClick={() => handleCheckOut(booking)}
-                                                        className="bg-green-600 hover:bg-green-700 text-white"
-                                                    >
-                                                        <CheckOutIcon className="w-4 h-4 mr-1" />
-                                                        Check-Out
-                                                    </Button>
-                                                )}
-
-                                                {/* More Actions */}
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="sm">
-                                                            <MoreVertical className="w-4 h-4" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem onClick={() => handleResendConfirmation(booking)}>
-                                                            <Mail className="w-4 h-4 mr-2" />
-                                                            Resend Confirmation
-                                                        </DropdownMenuItem>
-                                                        {booking.status !== 'cancelled' && booking.status !== 'checked_out' && (
-                                                            <DropdownMenuItem
-                                                                onClick={() => {
-                                                                    setSelectedBooking(booking);
-                                                                    setShowCancelModal(true);
-                                                                }}
-                                                                className="text-red-600"
-                                                            >
-                                                                <XCircle className="w-4 h-4 mr-2" />
-                                                                Cancel Booking
-                                                            </DropdownMenuItem>
-                                                        )}
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
-                </div>
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                    <div className="flex items-center justify-between px-6 py-4 border-t">
-                        <div className="text-sm text-gray-600">
-                            Page {currentPage} of {totalPages}
-                        </div>
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                                disabled={currentPage === 1}
-                            >
-                                Previous
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                                disabled={currentPage === totalPages}
-                            >
-                                Next
-                            </Button>
-                        </div>
-                    </div>
-                )}
-            </div>
+            <BookingTableManagement
+                paginatedBookings={paginatedBookings}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                setCurrentPage={setCurrentPage}
+                getStatusBadge={getStatusBadge}
+                setSelectedBooking={setSelectedBooking}
+                setShowDetailsModal={setShowDetailsModal}
+                setShowCancelModal={setShowCancelModal}
+                refetchBooking={refetchBooking}
+            />
 
             {/* Booking Details Modal */}
             <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle style={{ fontFamily: 'var(--font-serif)' }}>
-                            Booking Details - {selectedBooking?.id}
+                            Booking Details - {selectedBooking?._id}
                         </DialogTitle>
                         <DialogDescription>
                             Complete information about this booking
@@ -570,7 +281,7 @@ const BookingManagementPage = ({ onNavigate }) => {
                             <div>
                                 <Label>Current Status</Label>
                                 <div className="mt-2">
-                                    {getStatusBadge(selectedBooking.status)}
+                                    {getStatusBadge(selectedBooking.bookingStatus)}
                                 </div>
                             </div>
 
@@ -582,19 +293,19 @@ const BookingManagementPage = ({ onNavigate }) => {
                                 <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
                                     <div>
                                         <Label className="text-gray-600">Name</Label>
-                                        <p className="mt-1">{selectedBooking.customerName}</p>
+                                        <p className="mt-1">{selectedBooking.userId.userName}</p>
                                     </div>
                                     <div>
                                         <Label className="text-gray-600">Email</Label>
-                                        <p className="mt-1">{selectedBooking.customerEmail}</p>
+                                        <p className="mt-1">{selectedBooking.userId.userName}</p>
                                     </div>
                                     <div>
                                         <Label className="text-gray-600">Phone</Label>
-                                        <p className="mt-1">{selectedBooking.customerPhone}</p>
+                                        <p className="mt-1">{selectedBooking.userId.userName}</p>
                                     </div>
                                     <div>
                                         <Label className="text-gray-600">Guests</Label>
-                                        <p className="mt-1">{selectedBooking.guests} people</p>
+                                        <p className="mt-1">{selectedBooking.numberOfGuests} people</p>
                                     </div>
                                 </div>
                             </div>
@@ -607,31 +318,31 @@ const BookingManagementPage = ({ onNavigate }) => {
                                 <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
                                     <div>
                                         <Label className="text-gray-600">Resort</Label>
-                                        <p className="mt-1">{selectedBooking.resortName}</p>
+                                        <p className="mt-1">{selectedBooking.resortId.resortName}</p>
                                     </div>
                                     <div>
                                         <Label className="text-gray-600">Booking Date</Label>
-                                        <p className="mt-1">{new Date(selectedBooking.bookingDate).toLocaleDateString('en-GB')}</p>
+                                        <p className="mt-1">{new Date(selectedBooking.createDate).toLocaleDateString('en-GB')}</p>
                                     </div>
                                     <div>
                                         <Label className="text-gray-600">Check-in</Label>
-                                        <p className="mt-1">{new Date(selectedBooking.checkInDate).toLocaleDateString('en-GB')}</p>
+                                        <p className="mt-1">{new Date(selectedBooking.checkIn).toLocaleDateString('en-GB')}</p>
                                     </div>
                                     <div>
                                         <Label className="text-gray-600">Check-out</Label>
-                                        <p className="mt-1">{new Date(selectedBooking.checkOutDate).toLocaleDateString('en-GB')}</p>
+                                        <p className="mt-1">{new Date(selectedBooking.checkOut).toLocaleDateString('en-GB')}</p>
                                     </div>
                                     <div className="col-span-2">
                                         <Label className="text-gray-600">Total Amount</Label>
                                         <p className="mt-1 text-2xl text-[#14b8a6]">
-                                            ${selectedBooking.totalAmount.toLocaleString()}
+                                            ${selectedBooking.bookingTotal.toLocaleString()}
                                         </p>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Services */}
-                            {selectedBooking.services.length > 0 && (
+                            {/* {selectedBooking.services.length > 0 && (
                                 <div>
                                     <h3 className="text-lg mb-3" style={{ fontFamily: 'var(--font-serif)' }}>
                                         Additional Services
@@ -644,10 +355,10 @@ const BookingManagementPage = ({ onNavigate }) => {
                                         </ul>
                                     </div>
                                 </div>
-                            )}
+                            )} */}
 
                             {/* Payment History */}
-                            <div>
+                            {/* <div>
                                 <h3 className="text-lg mb-3" style={{ fontFamily: 'var(--font-serif)' }}>
                                     Payment History
                                 </h3>
@@ -667,10 +378,10 @@ const BookingManagementPage = ({ onNavigate }) => {
                                         </div>
                                     ))}
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Special Requests */}
-                            {selectedBooking.specialRequests && (
+                            {/* {selectedBooking.specialRequests && (
                                 <div>
                                     <h3 className="text-lg mb-3" style={{ fontFamily: 'var(--font-serif)' }}>
                                         Special Requests
@@ -679,10 +390,10 @@ const BookingManagementPage = ({ onNavigate }) => {
                                         <p>{selectedBooking.specialRequests}</p>
                                     </div>
                                 </div>
-                            )}
+                            )} */}
 
                             {/* Cancellation Information */}
-                            {selectedBooking.status === 'cancelled' && (
+                            {selectedBooking.bookingStatus === 'Cancelled' && (
                                 <div>
                                     <h3 className="text-lg mb-3 text-red-600" style={{ fontFamily: 'var(--font-serif)' }}>
                                         Cancellation Information
