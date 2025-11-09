@@ -10,5 +10,7 @@ router.post('/', authMiddleware.tokenProvider, bookingController.createNewBookin
 router.patch('/', bookingController.updateBooking)
 router.patch('/:bookingId/confirm', bookingController.confirmBooking)
 router.patch('/:bookingId/completed', bookingController.completedBooking)
+router.patch('/:bookingId/checkIn', bookingController.checkInBooking)
+router.patch('/:bookingId/checkOut', bookingController.checkOutBooking)
 
 module.exports = router

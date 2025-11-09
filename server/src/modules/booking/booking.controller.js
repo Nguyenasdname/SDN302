@@ -5,10 +5,7 @@ exports.getListBooking = async (req, res) => {
     try {
         const listBooking = await bookingService.getListBooking()
         if (!listBooking) return res.status(404).json({ message: `Not Found` })
-        res.json({
-            message: `Get List Booking By Success!`,
-            listBooking
-        })
+        res.json(listBooking)
     } catch (err) {
         console.error(err)
     }
@@ -106,6 +103,32 @@ exports.completedBooking = async (req, res) => {
         res.json({
             message: `Successful`,
             booking: completedBooking
+        })
+    } catch (err) {
+        console.error(err)
+    }
+}
+
+exports.checkInBooking = async (req, res) => {
+    const { bookingId } = req.params
+    try {
+        const checkInBooking = await bookingService.checkInBooking(bookingId)
+        res.json({
+            message: `Successful`,
+            booking: checkInBooking
+        })
+    } catch (err) {
+        console.error(err)
+    }
+}
+
+exports.checkOutBooking = async (req, res) => {
+    const { bookingId } = req.params
+    try {
+        const checkOutBooking = await bookingService.checkOutBooking(bookingId)
+        res.json({
+            message: `Successful`,
+            booking: checkOutBooking
         })
     } catch (err) {
         console.error(err)
