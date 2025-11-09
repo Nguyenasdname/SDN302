@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGet } from '../../hooks/useGet';
+import ReviewLayout from '../../layouts/ReviewLayout/ReviewLayout';
 
 
 const ResortDetailsPage = ({ property, onNavigate, isWishlisted = true, toggleWishlist }) => {
@@ -313,44 +314,7 @@ const ResortDetailsPage = ({ property, onNavigate, isWishlisted = true, toggleWi
                         </div>
 
                         {/* Reviews */}
-                        <div>
-                            <div className="flex items-center gap-3 mb-6">
-                                <h2 className="text-2xl md:text-3xl" style={{ fontFamily: 'var(--font-serif)' }}>
-                                    Guest Reviews
-                                </h2>
-                                <div className="flex items-center gap-2">
-                                    <Star className="w-5 h-5 fill-[#fbbf24] text-[#fbbf24]" />
-                                    <span className="text-xl">5</span>
-                                    <span className="text-gray-500">(100 reviews)</span>
-                                </div>
-                            </div>
-
-                            <div className="space-y-6">
-                                {mockReviews.map((review) => (
-                                    <Card key={review.id} className="p-6">
-                                        <div className="flex items-start gap-4">
-                                            <img
-                                                src={review.avatar}
-                                                alt={review.name}
-                                                className="w-12 h-12 rounded-full"
-                                            />
-                                            <div className="flex-1">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <h4 style={{ fontFamily: 'var(--font-serif)' }}>{review.name}</h4>
-                                                    <span className="text-sm text-gray-500">{review.date}</span>
-                                                </div>
-                                                <div className="flex items-center gap-1 mb-3">
-                                                    {[...Array(review.rating)].map((_, i) => (
-                                                        <Star key={i} className="w-4 h-4 fill-[#fbbf24] text-[#fbbf24]" />
-                                                    ))}
-                                                </div>
-                                                <p className="text-gray-700">{review.comment}</p>
-                                            </div>
-                                        </div>
-                                    </Card>
-                                ))}
-                            </div>
-                        </div>
+                        <ReviewLayout resortId={resortId}/>
                     </div>
 
                     {/* Right Column - Booking Widget (Sticky) */}

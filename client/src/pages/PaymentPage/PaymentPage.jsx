@@ -54,6 +54,10 @@ const PaymentPage = ({ onNavigate }) => {
                 });
             }
 
+            if (paymentType === "Payment") {
+                await patchData(`/booking/${bookingData._id}/completed`, {});
+            }
+
             if (res) {
                 alert("Thanh toán thành công!");
                 navigate("/");

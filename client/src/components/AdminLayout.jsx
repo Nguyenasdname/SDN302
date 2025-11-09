@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Users, Home as HomeIcon, MessageSquare, LayoutDashboard, Menu, X, LogOut, DollarSign, Briefcase, Calendar } from 'lucide-react';
 import { Button } from './ui/button';
+import { useNavigate } from 'react-router-dom';
 
 
 const AdminLayout = ({ children, currentPage, onNavigate, onLogout, currentUser }) => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
-
+    const navigate = useNavigate()
     const menuItems = [
         { id: 'admin-revenue', label: 'Revenue & Analytics', icon: DollarSign },
         { id: 'admin-bookings', label: 'Booking Management', icon: Calendar },
@@ -31,7 +32,7 @@ const AdminLayout = ({ children, currentPage, onNavigate, onLogout, currentUser 
                         </Button>
 
                         <button
-                            onClick={() => onNavigate('home')}
+                            onClick={() => navigate('/')}
                             className="flex items-center gap-2"
                         >
                             <div className="w-10 h-10 rounded-full flex items-center justify-center"
@@ -66,7 +67,7 @@ const AdminLayout = ({ children, currentPage, onNavigate, onLogout, currentUser 
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => onNavigate('/')}
+                            onClick={() => navigate('/')}
                         >
                             <HomeIcon className="w-4 h-4 mr-2" />
                             Back to Site

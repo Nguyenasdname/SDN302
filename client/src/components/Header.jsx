@@ -70,7 +70,7 @@ const Header = ({ currentPage }) => {
               Home
             </button>
             <button
-              onClick={() => navigate("list")}
+              onClick={() => navigate("/list")}
               className={`transition-colors ${
                 currentPage === "list"
                   ? "text-[#14b8a6]"
@@ -80,13 +80,13 @@ const Header = ({ currentPage }) => {
               Resorts & Rooms
             </button>
             <button
-              onClick={() => navigate("home")}
+              onClick={() => navigate("/")}
               className="text-gray-600 hover:text-[#14b8a6] transition-colors"
             >
               Destinations
             </button>
             <button
-              onClick={() => navigate("home")}
+              onClick={() => navigate("/")}
               className="text-gray-600 hover:text-[#14b8a6] transition-colors"
             >
               About Us
@@ -118,7 +118,7 @@ const Header = ({ currentPage }) => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="cursor-pointer"
-                  onClick={() => navigate("profile")}
+                  onClick={() => navigate("/profile")}
                 >
                   <User className="w-4 h-4 mr-2 " />
                   Profile
@@ -126,7 +126,7 @@ const Header = ({ currentPage }) => {
                 {user.userRole === "employee" && (
                   <>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate("resort-form")}>
+                    <DropdownMenuItem onClick={() => navigate("/resort-form")}>
                       <svg
                         className="w-4 h-4 mr-2"
                         fill="none"
@@ -149,7 +149,7 @@ const Header = ({ currentPage }) => {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       className="cursor-pointer"
-                      onClick={() => navigate("admin-dashboard")}
+                      onClick={() => navigate("/admin-dashboard")}
                     >
                       <svg
                         className="w-4 h-4 mr-2"
