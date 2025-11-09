@@ -31,6 +31,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useGet } from '../../hooks/useGet';
 import BookingHistoryCard from '../../components/BookingHistoryCard';
+import { usePatch } from '../../hooks/usePatch'
 
 
 const ProfilePage = ({ onNavigate, wishlist, toggleWishlist, currentUser }) => {
@@ -44,11 +45,13 @@ const ProfilePage = ({ onNavigate, wishlist, toggleWishlist, currentUser }) => {
     const [bookingService, setBookingService] = useState([])
     const navigate = useNavigate()
 
-    const { data: userListBooking, loading: bookingLoading } = useGet('/booking/user')
+    const { data: userListBooking, loading: bookingLoading, refetch: bookingRefetch } = useGet('/booking/user')
 
 
     const endpoint = selectedBooking?._id ? `/bookingService/${selectedBooking._id}` : null;
     const { data: bookingServiceData, refetch: refetchBookingService } = useGet(endpoint)
+
+    const { patchData, error: patchError } = usePatch()
 
     useEffect(() => {
         const savedBookings = JSON.parse(localStorage.getItem('mybooking-bookings') || '[]');
@@ -76,26 +79,27 @@ const ProfilePage = ({ onNavigate, wishlist, toggleWishlist, currentUser }) => {
     const pastBookings = allBookings.filter((b) => pastStatus.includes(b.bookingStatus));
     // const wishlistProperties = properties.filter((p) => wishlist.includes(p.id));
 
-    const handleCancelBooking = () => {
+    const handleCancelBooking = async () => {
         if (!cancellationReason.trim()) {
             toast.error('Please provide a cancellation reason');
             return;
         }
+        try {
+            const res = patchData(`/booking/${selectedBooking._id}/cancel`,{
+                cancelReason: cancellationReason
+            })
+            if (res) {
+                toast.success('Booking cancelled successfully');
+                window.location.reload()
+                bookingRefetch()
+                setShowCancelModal(false);
+                setCancellationReason('');
+                setSelectedBooking(null);
+            }
+        } catch (err) {
+            alert(patchError)
+        }
 
-        // Update the booking status
-        const updatedBookings = userBookings.map(booking =>
-            booking.id === selectedBooking.id
-                ? { ...booking, status: 'cancelled', cancellationReason, cancellationDate: new Date().toISOString() }
-                : booking
-        );
-
-        setUserBookings(updatedBookings);
-        localStorage.setItem('mybooking-bookings', JSON.stringify(updatedBookings));
-
-        toast.success('Booking cancelled successfully');
-        setShowCancelModal(false);
-        setCancellationReason('');
-        setSelectedBooking(null);
     };
 
     return (

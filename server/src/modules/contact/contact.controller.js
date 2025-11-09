@@ -1,86 +1,63 @@
-const contactService = require('./contact.service')
+const ContactService = require('./contact.service')
 
-// Tạo contact
-exports.createContact = async (req, res) => {
+exports.CreateContact = async (req, res) => {
+    const { contactData } = req.body
+    const userId = req.user.id
     try {
-        const userId = req.user_id
-        const { contactTitle, contactContent } = req.body;
-
-        const contact = await contactService.createContact({ userId, contactTitle, contactContent });
-        
-        res.status(201).json(contact);
-    } catch (error) {
-        res.status(500).json({ message: error.message })
+        const newContact = await ContactService.CreateContact(userId, contactData)
+        res.json(newContact)
+    } catch (err) {
+        console.error(err)
     }
 }
 
-// Lấy all contact cho admin
-exports.getAllContacts = async (req, res) => {
+exports.GetAllContact = async (req, res) => {
     try {
-        const contacts = await contactService.getAllContacts();
-
-        res.status(200).json(contacts);
-    } catch (error) {
-        res.status(500).json({ message: error.message })
+        const contacts = await ContactService.GetAllContact()
+        res.json(contacts)
+    } catch (err) {
+        console.error(err)
     }
 }
 
-// Lấy contact = id
-exports.getContactById = async (req, res) => {
+exports.GetInquiriesContact = async (req, res) => {
     try {
-        const { id } = req.params;
-        const contact = await contactService.getContactById(id);
-
-        if (!contact) {
-            return res.status(404).json({ message: 'Contact not found' });
-        }
-
-        res.status(200).json(contact);
-    } catch (error) {
-        res.status(500).json({ message: error.message })
+        const contacts = await ContactService.GetInquiriesContact()
+        res.json(contacts)
+    } catch (err) {
+        console.error(err)
     }
 }
 
-// Update contact
-exports.updateContact = async (req, res) => {
+exports.GetRefundContact = async (req, res) => {
     try {
-        const { id } = req.params;
-        const updated = await contactService.updateContact(id, req.body);
-
-        if (!updated) {
-            return res.status(404).json({ message: 'Contact not found' });
-        }
-
-        res.status(200).json(updated);
-    } catch (error) {
-        res.status(500).json({ message: error.message })
+        const contacts = await ContactService.GetRefundContact()
+        res.json(contacts)
+    } catch (err) {
+        console.error(err)
     }
 }
 
-// Xóa contact
-exports.deleteContact = async (req, res) => {
+exports.SetSeenContact = async (req, res) => {
+    const { contactId } = req.params
     try {
-        const { id } = req.params;
-        const deleted = await contactService.deleteContact(id)
-
-        if (!deleted) {
-            return res.status(404).json({ message: 'Contact not found' });
-        }
-
-        res.status(200).json({ message: 'Contact deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ message: error.message })
+        const contact = await ContactService.SetSeenContact(contactId)
+        res.json({
+            message: `Successful`,
+            contact
+        })
+    } catch (err) {
+        console.error(err)
     }
 }
 
-// User xem lại contact
-exports.getContactsByUser = async (req, res) => {
+exports.ReplyContact = async (req, res) => {
+    const { contactId } = req.params
+    const { replyMessage } = req.body
     try {
-        const userId = req.user._id;
-        const contacts = await contactService.getContactsByUser(userId);
-        
-        res.status(200).json(contacts);
-    } catch (error) {
-        res.status(500).json({ message: error.message })
+        const contact = await ContactService.ReplyContact(contactId, replyMessage)
+        res.json(contact)
+    } catch (err) {
+        console.error(err)
     }
 }

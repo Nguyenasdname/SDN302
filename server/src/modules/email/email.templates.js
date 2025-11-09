@@ -31,3 +31,11 @@ exports.paymentSuccessTemplate = (amount, paymentId, userName) => `
     </div>
 `
 
+exports.replyContact = (replyMessage, contact) => `
+    <div style="line-height: 1.6;">
+        <h2>Hello ${contact.userId.userName || ''}</h2>
+        <p>${replyMessage}</p>
+        <p>If you didn't request this, ignore this email</p>
+    </div>
+`
+

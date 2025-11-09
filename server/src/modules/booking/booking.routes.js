@@ -12,5 +12,6 @@ router.patch('/:bookingId/confirm', bookingController.confirmBooking)
 router.patch('/:bookingId/completed', bookingController.completedBooking)
 router.patch('/:bookingId/checkIn', bookingController.checkInBooking)
 router.patch('/:bookingId/checkOut', bookingController.checkOutBooking)
+router.patch('/:bookingId/cancel', authMiddleware.tokenProvider, bookingController.cancelBooking)
 
 module.exports = router
