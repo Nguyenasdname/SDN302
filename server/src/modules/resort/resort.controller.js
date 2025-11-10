@@ -231,7 +231,7 @@ exports.checkAvailable = async (req, res) => {
 // };
 
 exports.getAvailableResorts = async (req, res) => {
-  const { startDate, endDate, numberOfGuests } = req.body;
+  const { startDate, endDate, numberOfGuests } = req.body || {};
 
   try {
     const resorts = await resortService.getAvailableResorts(startDate, endDate, numberOfGuests);

@@ -5,8 +5,35 @@ const { uploadImageToCloudinary } = require("../cloudinary/cloudinary.service")
 
 // Lấy all resort
 exports.getAllResorts = async () => {
+  // try {
+  //   return await Resort.find().sort({ createDate: -1 });
+  // } catch (error) {
+  //   throw error;
+  // }
   try {
-    return await Resort.find().sort({ createDate: -1 });
+    const resorts = await Resort.find().sort({ createDate: -1 }).lean();
+
+    const resortIds = resorts.map(resort => resort._id);
+
+    const images = await ImageResort.find({ resortId: { $in: resortIds } })
+      .select("resortId imageUrl -_id")
+      .lean();
+
+    // Tạo map để nhóm ảnh theo resortId
+    const imageMap = images.reduce((acc, img) => {
+      const id = img.resortId.toString();
+      if (!acc[id]) acc[id] = [];
+      acc[id].push(img.imageUrl);
+      return acc;
+    }, {});
+
+    // Gắn ảnh vào từng resort
+    const resortsWithImages = resorts.map(resort => ({
+      ...resort,
+      images: imageMap[resort._id.toString()] || [],
+    }));
+
+    return resortsWithImages;
   } catch (error) {
     throw error;
   }
@@ -89,75 +116,56 @@ exports.checkAvailable = async (resortId, startDate, endDate) => {
   }
 }
 
-// exports.getAvailableResorts = async (startDate, endDate, numberOfGuest = 1, searchQuery = '') => {
-//   try {
-//     let bookedResorts = [];
-
-//     // Nếu có ngày check-in/check-out mới lọc booking
-//     if (startDate && endDate) {
-//       const activeStatuses = ["pending", "confirmed", "checkIn", "checkOut"];
-//       bookedResorts = await Booking.find({
-//         bookingStatus: { $in: activeStatuses },
-//         $or: [
-//           { checkIn: { $lt: endDate }, checkOut: { $gt: startDate } }
-//         ],
-//       }).distinct("resortId");
-//     }
-
-//     // Build query filter
-//     const query = {
-//       resortCapacity: { $gte: numberOfGuest },
-//     };
-
-//     if (bookedResorts.length > 0) {
-//       query._id = { $nin: bookedResorts };
-//     }
-
-//     if (searchQuery && searchQuery.trim() !== '') {
-//   const regex = new RegExp(searchQuery, 'i'); // 'i' = case-insensitive
-//   query.$or = [
-//     { resortName: regex },
-//     { resortDescription: regex }
-//   ];
-// }
-
-
-//     const availableResorts = await Resort.find(query);
-//     return availableResorts;
-//   } catch (err) {
-//     console.error('Error in getAvailableResorts:', err);
-//     return [];
-//   }
-// };
 
 exports.getAvailableResorts = async (startDate, endDate, numberOfGuests) => {
-  const activeStatuses = ['pending', 'confirmed', 'checkIn', 'checkOut'];
+  const activeStatuses = ['Pending', 'Confirmed', 'CheckIn', 'CheckOut'];
 
   try {
-    // Nếu không có ngày thì trả về toàn bộ resort có sức chứa phù hợp
+    let availableResorts;
+
     if (!startDate || !endDate) {
-      return await Resort.find({
-        resortCapacity: { $gte: numberOfGuests || 1 } // nếu không có số khách thì mặc định là 1
+      // Nếu không có ngày thì trả về toàn bộ resort có sức chứa phù hợp
+      availableResorts = await Resort.find({
+        resortCapacity: { $gte: numberOfGuests || 1 }
+      });
+    } else {
+      // Tìm các resort bị cấn lịch
+      const conflictedResorts = await Booking.find({
+        bookingStatus: { $in: activeStatuses },
+        $or: [
+          { checkIn: { $lt: endDate }, checkOut: { $gt: startDate } }
+        ]
+      }).distinct('resortId');
+
+      // Trả về các resort không bị cấn và đủ sức chứa
+      availableResorts = await Resort.find({
+        _id: { $nin: conflictedResorts },
+        resortCapacity: { $gte: numberOfGuests || 1 }
       });
     }
 
-    // Tìm các resort bị cấn lịch
-    const conflictedResorts = await Booking.find({
-      bookingStatus: { $in: activeStatuses },
-      $or: [
-        { checkIn: { $lt: endDate }, checkOut: { $gt: startDate } }
-      ]
-    }).distinct('resortId');
+    // Lấy danh sách ảnh cho các resort
+    const resortIds = availableResorts.map(resort => resort._id);
+    const images = await ImageResort.find({ resortId: { $in: resortIds } })
+      .select("resortId imageUrl -_id")
+      .lean();
 
-    // Trả về các resort không bị cấn và đủ sức chứa
-    const availableResorts = await Resort.find({
-      _id: { $nin: conflictedResorts },
-      resortCapacity: { $gte: numberOfGuests || 1 }
-    });
+    const imageMap = images.reduce((acc, img) => {
+      const id = img.resortId.toString();
+      if (!acc[id]) acc[id] = [];
+      acc[id].push(img.imageUrl);
+      return acc;
+    }, {});
 
-    return availableResorts;
+    const resortsWithImages = availableResorts.map(resort => ({
+      ...resort.toObject(), // chuyển sang plain object để thêm field mới
+      images: imageMap[resort._id.toString()] || []
+    }));
+
+    return resortsWithImages;
   } catch (err) {
     console.error(err);
     throw err;
   }
 };
+

@@ -68,7 +68,7 @@ export default function VerifyOTPPage() {
         const otpString = otp.join("")
         console.log(localStorage.getItem('token'))
         try {
-            const res = await postData(`/auth/verify-otp?action${action}`, { otp: otpString });
+            const res = await postData(`/auth/verify-otp?action=${action}`, { otp: otpString });
             if (!res) {
                 setError('Invalid OTP. Please enter a valid OTP.!')
                 return

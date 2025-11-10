@@ -427,7 +427,7 @@ const BookingRoomPage = ({ onNavigate, currentUser }) => {
                         {/* Property Image */}
                         <div className="relative h-48 rounded-lg overflow-hidden mb-4">
                             <ImageWithFallback
-                                src={resort.resortIMG}
+                                src={resort.images[0]}
                                 alt={resort.resortName}
                                 className="w-full h-full object-cover"
                             />

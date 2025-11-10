@@ -23,7 +23,7 @@ const PropertyCard = ({ resort, onBook, isWishlisted = true, toggleWishlist }) =
 
             >
                 <ImageWithFallback
-                    src={resort.resortIMG || '/placeholder.jpg'} // resort.image giả định hoặc fallback
+                    src={resort.images[0] || '/placeholder.jpg'} // resort.image giả định hoặc fallback
                     alt={resort.resortName}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                 />
