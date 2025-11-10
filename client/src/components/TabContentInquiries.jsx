@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     Mail,
     Send,
@@ -50,6 +50,10 @@ const TabContentInquiries = ({
 }) => {
     const { patchData, error: patchError } = usePatch()
 
+    useEffect(() =>{
+        console.log(filteredInquiries)
+    },[])
+
     const handleSendReply = async () => {
         if (replyMessage === '') {
             toast.error('Missing Field')
@@ -70,7 +74,7 @@ const TabContentInquiries = ({
     }
     const handleSelectSeen = async (inquiry) => {
         setSelectedInquiry(inquiry)
-        if (inquiry.contactStatus === 'Seen' || inquiry === 'Replied') {
+        if (inquiry.contactStatus === 'Seen' || inquiry.contactStatus === 'Replied') {
             return
         }
         try {

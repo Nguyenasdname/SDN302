@@ -60,3 +60,19 @@ exports.updatePayment = async (paymentId, paymentData) => {
 //         console.error(err)
 //     }
 // }
+exports.getPaymentByIdPopulate = async (paymentId) => {
+    try {
+        const payment = await Payment.findById(paymentId)
+            .populate({
+                path: 'bookingId', // Populate the bookingId field
+                populate: {
+                    path: 'resortId', // Populate the resortId field within bookingId
+                    model: 'Resort'  // Specify the model for clarity (optional if ref is correctly defined)
+                }
+            }).populate('userId')
+            .exec();
+        return payment
+    } catch (err) {
+        throw err
+    }
+}

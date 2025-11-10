@@ -1,12 +1,26 @@
 const Booking = require('./boooking.model')
 const Payment = require('../payment/payment.model')
 const Contact = require('../contact/contact.model')
+const Email = require('../email/email.service')
+const EmailTemplate = require('../email/email.templates')
+const User = require('../user/user.model')
+const BookingService = require('../bookingService/bookingService.model')
 
 exports.getListBooking = async () => {
     try {
         return await Booking.find().populate('userId').populate('resortId')
     } catch (err) {
         console.error(err)
+    }
+}
+
+exports.getBookingByBookingId = async (bookingId) => {
+    try {
+        const booking = await Booking.findById(bookingId).populate('resortId').populate('userId')
+        console.log(booking)
+        return booking
+    } catch (err) {
+        throw err
     }
 }
 
@@ -29,16 +43,34 @@ exports.getBookingDetails = async (bookingId) => {
 exports.createNewBooking = async (bookingData, userId) => {
     try {
 
-        const { checkIn, checkOut, ...rest } = bookingData
+        const { checkIn, checkOut, resortId, ...rest } = bookingData
+
+        const checkInDate = new Date(checkIn)
+        const checkOutDate = new Date(checkOut)
+
+        const conflictBooking = await Booking.findOne({
+            resortId,
+            checkIn: { $lt: checkOutDate },
+            checkOut: { $gt: checkInDate },
+            bookingStatus: { $nin: ['Cancelled', 'Completed'] }
+        })
+
+        if (conflictBooking) {
+            console.log(conflictBooking)
+            throw new Error('The resort is already booked during the selected time period.')
+
+        }
+
         const newBooking = new Booking({
             userId,
-            checkIn: new Date(checkIn),
-            checkOut: new Date(checkOut),
+            checkIn: checkInDate,
+            checkOut: checkOutDate,
+            resortId,
             ...rest
         })
         return await newBooking.save()
     } catch (err) {
-        console.error(err)
+        throw err
     }
 }
 

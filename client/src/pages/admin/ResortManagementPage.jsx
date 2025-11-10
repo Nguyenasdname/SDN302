@@ -50,8 +50,8 @@ const ResortManagementPage = ({ onNavigate }) => {
         status: 'available',
         location: 'Hoi An',
     });
-    const [imagePreviews, setImagePreviews] = useState([]);     
-const [existingImages, setExistingImages] = useState([]);
+    const [imagePreviews, setImagePreviews] = useState([]);
+    const [existingImages, setExistingImages] = useState([]);
 
     // Fetch resorts from API on component mount
     useEffect(() => {
@@ -75,15 +75,15 @@ const [existingImages, setExistingImages] = useState([]);
     };
 
     const toggleAmenity = (amenity) => {
-    setFormData(prev => {
-        const amenities = prev.amenities || [];
-        if (amenities.includes(amenity)) {
-            return { ...prev, amenities: amenities.filter(a => a !== amenity) };
-        } else {
-            return { ...prev, amenities: [...amenities, amenity] };
-        }
-    });
-};
+        setFormData(prev => {
+            const amenities = prev.amenities || [];
+            if (amenities.includes(amenity)) {
+                return { ...prev, amenities: amenities.filter(a => a !== amenity) };
+            } else {
+                return { ...prev, amenities: [...amenities, amenity] };
+            }
+        });
+    };
 
     // Filter resort by search query
     const filteredResorts = resort.filter(resort =>
@@ -92,7 +92,7 @@ const [existingImages, setExistingImages] = useState([]);
         resort.location?.toLowerCase().includes(searchQuery.toLowerCase())
     );
     console.log('Search query:', searchQuery);
-console.log('Filtered resorts:', filteredResorts);
+    console.log('Filtered resorts:', filteredResorts);
 
     const handleOpenAddDialog = () => {
         console.log('Opening Add Resort Dialog');
@@ -111,7 +111,7 @@ console.log('Filtered resorts:', filteredResorts);
             location: 'Hoi An',
         });
         setImagePreviews([]);
-    setExistingImages([]);
+        setExistingImages([]);
         setShowAddEditDialog(true);
     };
 
@@ -119,51 +119,51 @@ console.log('Filtered resorts:', filteredResorts);
         console.log('Opening Edit Dialog for resort:', resort);
         setEditingResort(resort);
         setFormData({
-            name: resort.name,
-            description: resort.description,
-            price: resort.price,
-            hourlyPrice: resort.hourlyPrice || 0,
-            type: resort.type,
-            maxOccupancy: resort.maxOccupancy,
+            name: resort.resortName,
+            description: resort.resortDescription,
+            price: resort.resortPrice,
+            hourlyPrice: resort.resortPrice * 0.17 || 0,
+            type: 'Resort',
+            maxOccupancy: resort.resortCapacity,
             area: resort.area,
             beds: resort.beds,
             amenities: resort.amenities || [],
-            status: resort.status,
-            location: resort.location,
+            status: resort.resortStatus,
+            location: resort.resortLocation,
         });
         setExistingImages(Array.isArray(resort.images) ? resort.images : []);
-    setImagePreviews([]);
+        setImagePreviews([]);
         setShowAddEditDialog(true);
     };
 
     const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) {
-        console.log('No file selected');
-        return;
-    }
-
-    const newPreviews = files.map(file => {
-        if (!(file instanceof File)) {
-            console.warn('Invalid file object:', file);
-            return null;
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) {
+            console.log('No file selected');
+            return;
         }
-        return {
-            file,
-            previewUrl: URL.createObjectURL(file) 
-        };
-    }).filter(Boolean); 
 
-    console.log('Images uploaded:', newPreviews.length, 'valid files');
-    setImagePreviews(newPreviews);
-    setFormData(prev => ({ ...prev, images: files }));
-};
+        const newPreviews = files.map(file => {
+            if (!(file instanceof File)) {
+                console.warn('Invalid file object:', file);
+                return null;
+            }
+            return {
+                file,
+                previewUrl: URL.createObjectURL(file)
+            };
+        }).filter(Boolean);
+
+        console.log('Images uploaded:', newPreviews.length, 'valid files');
+        setImagePreviews(newPreviews);
+        setFormData(prev => ({ ...prev, images: files }));
+    };
 
     // Save new resort or update existing one by calling API
     const handleSave = async () => {
-console.log('Save triggered. Editing:', !!editingResort);
-    console.log('Form data before save:', formData);
-    console.log('Image preview:', imagePreviews);
+        console.log('Save triggered. Editing:', !!editingResort);
+        console.log('Form data before save:', formData);
+        console.log('Image preview:', imagePreviews);
 
         if (!formData.name || !formData.description || !formData.price) {
             toast.error('Please fill in all required fields');
@@ -185,13 +185,13 @@ console.log('Save triggered. Editing:', !!editingResort);
             formPayload.append('amenities', JSON.stringify(formData.amenities));
 
             if (Array.isArray(imagePreviews) && imagePreviews.length > 0) {
-    imagePreviews.forEach((item, index) => {
-        if (item.file instanceof File) {
-            formPayload.append('images', item.file);
-            console.log(`Appending image ${index + 1}:`, item.file.name);
-        }
-    });
-}
+                imagePreviews.forEach((item, index) => {
+                    if (item.file instanceof File) {
+                        formPayload.append('images', item.file);
+                        console.log(`Appending image ${index + 1}:`, item.file.name);
+                    }
+                });
+            }
 
             const token = localStorage.getItem('token'); // Assuming you store JWT token here
             console.log('Auth token exists:', !!token);
@@ -222,7 +222,7 @@ console.log('Save triggered. Editing:', !!editingResort);
             }
 
             const result = await response.json();
-        console.log('Save success:', result);
+            console.log('Save success:', result);
 
             toast.success(editingResort ? 'Resort updated successfully!' : 'Resort added successfully!');
             setShowAddEditDialog(false);
@@ -275,60 +275,60 @@ console.log('Save triggered. Editing:', !!editingResort);
                             {/* Image */}
                             <div className="relative h-48 bg-gray-200">
                                 <img
-                                    src={resort.image}
-                                    alt={resort.name}
+                                    src={resort.images[0]}
+                                    alt={resort.resortName}
                                     className="w-full h-full object-cover"
                                 />
                                 <Badge
-                                    className={`absolute top-3 right-3 ${resort.status === 'available'
+                                    className={`absolute top-3 right-3 ${resort.resortStatus === 'Available'
                                         ? 'bg-green-500 hover:bg-green-600'
                                         : 'bg-orange-500 hover:bg-orange-600'
                                         }`}
                                 >
-                                    {resort.status === 'available' ? 'Available' : 'Maintenance'}
+                                    {resort.resortStatus === 'Available' ? 'Available' : 'Maintenance'}
                                 </Badge>
                             </div>
 
                             {/* Content */}
                             <div className="p-5">
                                 <h3 className="text-xl mb-2" style={{ fontFamily: 'var(--font-serif)' }}>
-                                    {resort.name}
+                                    {resort.resortName}
                                 </h3>
 
                                 <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
                                     <MapPin className="w-4 h-4" />
-                                    {resort.location}
+                                    {resort.resortLocation}
                                 </div>
 
                                 <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                                    {resort.description}
+                                    {resort.resortDescription}
                                 </p>
 
                                 {/* Details */}
                                 <div className="grid grid-cols-3 gap-2 mb-4 text-sm text-gray-600">
                                     <div className="flex items-center gap-1">
                                         <Users className="w-4 h-4" />
-                                        {resort.maxOccupancy}
+                                        {resort.resortCapacity}
                                     </div>
                                     <div className="flex items-center gap-1">
                                         <Bed className="w-4 h-4" />
-                                        {resort.beds}
+                                        {2}
                                     </div>
                                     <div className="flex items-center gap-1">
                                         <Maximize className="w-4 h-4" />
-                                        {resort.area}m²
+                                        {400}m²
                                     </div>
                                 </div>
 
                                 {/* Price */}
                                 <div className="mb-4">
                                     <p className="text-2xl text-[#14b8a6]" style={{ fontFamily: 'var(--font-serif)' }}>
-                                        ${resort.price}
+                                        ${resort.resortPrice}
                                         <span className="text-sm text-gray-500"> / night</span>
                                     </p>
                                     {resort.hourlyPrice && (
                                         <p className="text-sm text-gray-600">
-                                            ${resort.hourlyPrice} / hour
+                                            ${resort.resortPrice * 0.17} / hour
                                         </p>
                                     )}
                                 </div>
@@ -385,46 +385,46 @@ console.log('Save triggered. Editing:', !!editingResort);
                                     />
                                     <label htmlFor="image-upload" className="cursor-pointer block">
 
-            {existingImages.length > 0 && (
-                <div className="mb-4">
-                    <p className="text-xs text-gray-500 mb-2">Current images (will be replaced):</p>
-                    <div className="grid grid-cols-3 gap-2">
-                        {existingImages.map((url, i) => (
-                            <img key={i} src={url} alt="" className="h-24 w-full object-cover rounded" />
-                        ))}
-                    </div>
-                </div>
-            )}
+                                        {existingImages.length > 0 && (
+                                            <div className="mb-4">
+                                                <p className="text-xs text-gray-500 mb-2">Current images (will be replaced):</p>
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    {existingImages.map((url, i) => (
+                                                        <img key={i} src={url} alt="" className="h-24 w-full object-cover rounded" />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
 
-            {imagePreviews.length > 0 ? (
-                <div className="grid grid-cols-3 gap-2">
-                    {imagePreviews.map((item, i) => (
-                        <div key={i} className="relative">
-                            <img
-                                src={item.previewUrl}
-                                alt={`Preview ${i + 1}`}
-                                className="h-24 w-full object-cover rounded"
-                            />
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setImagePreviews(prev => prev.filter((_, idx) => idx !== i));
-                                }}
-                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center"
-                            >
-                                ×
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            ) : (
-                <div>
-                    <Upload className="w-12 h-12 mx-auto mb-2 text-gray-400" />
-                    <p className="text-gray-600">Click to upload or drag and drop</p>
-                    <p className="text-sm text-gray-400 mt-1">PNG, JPG up to 10MB (multiple)</p>
-                </div>
-            )}
-        </label>
+                                        {imagePreviews.length > 0 ? (
+                                            <div className="grid grid-cols-3 gap-2">
+                                                {imagePreviews.map((item, i) => (
+                                                    <div key={i} className="relative">
+                                                        <img
+                                                            src={item.previewUrl}
+                                                            alt={`Preview ${i + 1}`}
+                                                            className="h-24 w-full object-cover rounded"
+                                                        />
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setImagePreviews(prev => prev.filter((_, idx) => idx !== i));
+                                                            }}
+                                                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center"
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div>
+                                                <Upload className="w-12 h-12 mx-auto mb-2 text-gray-400" />
+                                                <p className="text-gray-600">Click to upload or drag and drop</p>
+                                                <p className="text-sm text-gray-400 mt-1">PNG, JPG up to 10MB (multiple)</p>
+                                            </div>
+                                        )}
+                                    </label>
                                 </div>
                             </div>
 

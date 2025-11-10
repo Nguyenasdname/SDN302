@@ -1,5 +1,9 @@
 const bookingService = require('./booking.service')
 const bookingServiceService = require('../bookingService/bookingService.service')
+const Email = require('../email/email.service')
+const EmailTemplate = require('../email/email.templates')
+const User = require('../user/user.model')
+const BookingService = require('../bookingService/bookingService.model')
 
 exports.getListBooking = async (req, res) => {
     try {
@@ -44,12 +48,24 @@ exports.createNewBooking = async (req, res) => {
         if (bookingServiceData) {
             await bookingServiceService.addOrUpdateBookingService(newBooking._id, bookingServiceData)
         }
+        const user = await User.findById(userId).select('-userPass')
+        const listBookingService = await BookingService.find({
+            bookingId: newBooking._id
+        }).populate('serviceId')
+        const sendMailBooking = await bookingService.getBookingByBookingId(newBooking._id)
+        console.log(sendMailBooking)
+        await Email.sendMail(
+            user.userEmail,
+            'Confirm Your Booking Now',
+            EmailTemplate.bookingConfirmationTemplate(user, sendMailBooking, listBookingService)
+        )
         res.json({
             message: 'Successful!',
             newBooking
         })
     } catch (err) {
         console.error(err)
+        res.status(500).json({ message: err.message || 'Internal Server Error' })
     }
 }
 
@@ -126,6 +142,12 @@ exports.checkOutBooking = async (req, res) => {
     const { bookingId } = req.params
     try {
         const checkOutBooking = await bookingService.checkOutBooking(bookingId)
+        const sendEmailBooking = await bookingService.getBookingByBookingId(bookingId)
+        await Email.sendMail(
+            sendEmailBooking.userId.userEmail,
+            'Check Out Booking',
+            EmailTemplate.checkOutNotificationTemplate(sendEmailBooking)
+        )
         res.json({
             message: `Successful`,
             booking: checkOutBooking

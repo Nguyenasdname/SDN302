@@ -1,4 +1,7 @@
 const paymentService = require('./payment.service')
+const Email = require('../email/email.service')
+const EmailTemplate = require('../email/email.templates')
+const User = require('../user/user.model')
 
 exports.getAllPayment = async (req, res) => {
     try {
@@ -60,6 +63,21 @@ exports.createPayment = async (req, res) => {
     try {
         const { paymentData } = req.body
         const newPayment = await paymentService.createPayment(paymentData, userId)
+        const user = await User.findById(userId).select('-userPass')
+        const sendMailPayment = await paymentService.getPaymentByIdPopulate(newPayment._id)
+        if (newPayment.paymentStatus === 'Deposit') {
+            await Email.sendMail(
+                user.userEmail,
+                'Confirm Booking',
+                EmailTemplate.bookingConfirmationWithPaymentTemplate(sendMailPayment)
+            )
+        } else {
+            await Email.sendMail(
+                user.userEmail,
+                'Completed Booking',
+                EmailTemplate.bookingCompletedTemplate(sendMailPayment)
+            )
+        }
         res.status(200).json({
             message: `Successful!`,
             newPayment

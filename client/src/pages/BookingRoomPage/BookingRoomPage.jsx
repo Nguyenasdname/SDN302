@@ -10,6 +10,7 @@ import { Checkbox } from '../../components/ui/checkbox';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useGet } from '../../hooks/useGet';
 import { usePost } from '../../hooks/usePost';
+import { toast } from 'sonner';
 
 
 const BookingRoomPage = ({ onNavigate, currentUser }) => {
@@ -166,6 +167,8 @@ const BookingRoomPage = ({ onNavigate, currentUser }) => {
             }
         } catch (err) {
             console.log(err)
+            alert(postError.response.data.message)
+            navigate('/list')
         }
     };
 
